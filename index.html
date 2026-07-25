@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daiki · ระบบบันทึกการมาทำงาน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --navy:#1B2D51; --ink:#101F36; --orange:#FFA506; --orange-soft:#FFF3DC;
+  --bg:#EEEEEA; --panel:#FFFFFF; --line:#E3E3DC; --muted:#7A8398;
+  --present:#2E9E6B; --late:#E8912A; --sick:#C24D6B; --personal:#6B6FCB;
+  --vacation:#2E93C4; --absent:#D8453A; --dayoff:#B4BAC6; --holiday:#9AA3B5;
+  --shadow:0 1px 2px rgba(16,31,54,.06),0 8px 24px rgba(16,31,54,.06);
+}*{box-sizing:border-box}html,body{margin:0;padding:0}body{
+  font-family:'IBM Plex Sans Thai',system-ui,sans-serif;
+  background:var(--bg);color:var(--ink);
+  font-size:14px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}#view-dash .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}#view-dash h1,#view-dash h2,#view-dash h3{font-family:'Anuphan',sans-serif;margin:0;font-weight:600;letter-spacing:-.01em}#view-dash .topbar{
+  background:var(--navy);color:#fff;position:sticky;top:0;z-index:40;
+  border-bottom:3px solid var(--orange);
+}#view-dash .topbar-in{max-width:1280px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}#view-dash .brand{display:flex;align-items:center;gap:12px;margin-right:auto}#view-dash .mark{width:38px;height:38px;flex:none}#view-dash .brand .t1{font-family:'Anuphan';font-weight:700;font-size:18px;line-height:1;letter-spacing:.02em}#view-dash .brand .t2{font-size:12px;color:#AEB8CF;margin-top:3px}#view-dash .tb-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}#view-dash .select-wrap{position:relative}#view-dash select,#view-dash .btn{
+  font-family:inherit;font-size:13px;border-radius:9px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;
+  padding:9px 14px;appearance:none;
+}#view-dash select{padding-right:32px}#view-dash .select-wrap::after{content:"";position:absolute;right:12px;top:50%;width:7px;height:7px;
+  border-right:2px solid #AEB8CF;border-bottom:2px solid #AEB8CF;transform:translateY(-70%) rotate(45deg);pointer-events:none}#view-dash .btn-upload{background:var(--orange);color:var(--ink);border:none;font-weight:600}#view-dash .btn-upload:hover{filter:brightness(1.05)}#view-dash .demo-tag{font-size:11px;font-weight:600;color:var(--ink);background:var(--orange);
+  padding:4px 9px;border-radius:999px;display:none}#view-dash .demo-tag.on{display:inline-block}#view-dash .wrap{max-width:1280px;margin:0 auto;padding:24px}#view-dash .section-h{display:flex;align-items:baseline;gap:12px;margin:0 2px 12px}#view-dash .section-h h2{font-size:17px}#view-dash .section-h .sub{font-size:12.5px;color:var(--muted)}#view-dash .eyebrow{font-family:'Anuphan';font-size:11px;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--orange)}#view-dash .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:30px}#view-dash .kpi{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 16px 14px;box-shadow:var(--shadow);position:relative;overflow:hidden}#view-dash .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c,var(--navy))}#view-dash .kpi .lab{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}#view-dash .kpi .dot{width:8px;height:8px;border-radius:3px;background:var(--c,var(--navy))}#view-dash .kpi .v{font-family:'Anuphan';font-weight:700;font-size:30px;line-height:1.1;margin-top:6px;color:var(--ink)}#view-dash .kpi .v small{font-size:14px;color:var(--muted);font-weight:500}#view-dash .kpi .cap{font-size:11.5px;color:var(--muted);margin-top:2px}#view-dash .panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:20px 22px;margin-bottom:30px}#view-dash .steps{display:flex;gap:10px;align-items:flex-end;overflow-x:auto;padding:6px 2px 2px}#view-dash .step{flex:1 0 62px;min-width:62px;text-align:center;cursor:pointer;border-radius:12px;padding:8px 6px 10px;
+  transition:background .12s;border:1px solid transparent}#view-dash .step:hover{background:#F6F6F2}#view-dash .step.sel{background:var(--orange-soft);border-color:#F4D99A}#view-dash .step.future{opacity:.35;pointer-events:none}#view-dash .step .date{font-size:11px;color:var(--muted)}#view-dash .step .date b{color:var(--ink);font-weight:600}#view-dash .bar-track{height:96px;display:flex;align-items:flex-end;justify-content:center;margin:6px 0 6px}#view-dash .bar{width:26px;background:var(--navy);border-radius:6px 6px 3px 3px;min-height:4px;position:relative;transition:height .3s ease}#view-dash .step.sel .bar{background:var(--orange)}#view-dash .step .cnt{font-family:'Anuphan';font-weight:700;font-size:16px;line-height:1}#view-dash .day-detail{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center}#view-dash .day-detail .dh{font-size:13px;font-weight:600;color:var(--ink);margin-right:6px}#view-dash .chip{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;background:#F6F6F2;border:1px solid var(--line);
+  padding:5px 11px;border-radius:999px}#view-dash .chip .cd{width:9px;height:9px;border-radius:3px}#view-dash .chip b{font-family:'Anuphan';font-variant-numeric:tabular-nums}#view-dash .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}#view-dash .field{background:var(--panel);border:1px solid var(--line);border-radius:11px;display:flex;align-items:center;gap:8px;padding:0 12px;box-shadow:var(--shadow)}#view-dash .field svg{color:var(--muted);flex:none}#view-dash .field input,#view-dash .field select{background:transparent;border:none;color:var(--ink);padding:11px 4px;font-family:inherit;font-size:13.5px;outline:none;min-width:150px}#view-dash .field select{cursor:pointer;padding-right:20px}#view-dash .field.grow{flex:1;min-width:200px}#view-dash .controls .btn.exp{background:var(--navy);border-color:var(--navy);margin-left:auto}#view-dash .controls .btn.exp:hover{background:var(--ink)}#view-dash .tbl-wrap{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}#view-dash table{width:100%;border-collapse:collapse;font-size:13px}#view-dash thead th{background:#F7F7F3;color:var(--muted);font-weight:600;font-size:11.5px;letter-spacing:.02em;
+  text-align:center;padding:12px 8px;border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0}#view-dash thead th.l{text-align:left;padding-left:20px}#view-dash tbody td{padding:12px 8px;border-bottom:1px solid #F0F0EA;text-align:center;vertical-align:middle}#view-dash tbody tr:last-child td{border-bottom:none}#view-dash tbody tr.emp-row{cursor:pointer}#view-dash tbody tr.emp-row:hover{background:#FBFAF6}#view-dash .idx{color:var(--muted);font-size:12px}#view-dash .who{text-align:left;padding-left:20px}#view-dash .who .nm{font-weight:600;color:var(--ink)}#view-dash .who .nm .nick{color:var(--orange);font-weight:600}#view-dash .who .role{font-size:11.5px;color:var(--muted);margin-top:1px}#view-dash .stat{font-family:'Anuphan';font-weight:600;font-variant-numeric:tabular-nums;font-size:14.5px}#view-dash .stat.z{color:#CBCEC7;font-weight:500}#view-dash .stat.present{color:var(--present)}#view-dash .stat.late{color:var(--late)}#view-dash .stat.sick{color:var(--sick)}#view-dash .stat.personal{color:var(--personal)}#view-dash .stat.vacation{color:var(--vacation)}#view-dash .stat.absent{color:var(--absent)}#view-dash .rate{display:flex;align-items:center;gap:8px;justify-content:flex-end;padding-right:16px}#view-dash .rate .rbar{width:64px;height:7px;border-radius:99px;background:#EDEDE7;overflow:hidden}#view-dash .rate .rfill{height:100%;border-radius:99px}#view-dash .rate .rv{font-family:'Anuphan';font-weight:600;font-variant-numeric:tabular-nums;width:44px;text-align:right}#view-dash .tl-row td{padding:0;background:#FAFAF6}#view-dash .tl{padding:14px 20px 18px;display:none}#view-dash .tl.open{display:block}#view-dash .tl .tl-h{font-size:12px;color:var(--muted);margin-bottom:9px}#view-dash .tl-grid{display:flex;flex-wrap:wrap;gap:5px}#view-dash .cell{width:34px;height:40px;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:11px;border:1px solid var(--line);background:#fff}#view-dash .cell .d{font-size:9px;color:var(--muted);line-height:1}#view-dash .cell .m{font-family:'Anuphan';font-weight:600;font-size:12px;line-height:1.3}#view-dash .cell.present{background:#EAF6F0;border-color:#BFE6D3;color:var(--present)}#view-dash .cell.late{background:#FDF1E1;border-color:#F6D9AF;color:var(--late)}#view-dash .cell.sick{background:#FBEBF0;border-color:#F0C6D3;color:var(--sick)}#view-dash .cell.personal{background:#EDEDFA;border-color:#CBCCF0;color:var(--personal)}#view-dash .cell.vacation{background:#E8F4FA;border-color:#BEE0F0;color:var(--vacation)}#view-dash .cell.absent{background:#FCEAE8;border-color:#F4C4BE;color:var(--absent)}#view-dash .cell.dayoff{background:#F3F3F0;color:var(--dayoff)}#view-dash .cell.holiday{background:#F3F3F0;color:var(--holiday)}#view-dash .cell.empty{background:#fff;color:#D9D9D2}#view-dash .empty-state{text-align:center;padding:70px 20px;color:var(--muted)}#view-dash .empty-state h3{font-size:18px;color:var(--ink);margin-bottom:8px}#view-dash .qcell{min-width:96px}#view-dash .qtop{font-size:12px;color:var(--muted)}#view-dash .qtop b{font-family:'Anuphan';font-size:16px;color:var(--ink)}#view-dash .qtop b.over{color:var(--absent)}#view-dash .qtrack{height:6px;border-radius:99px;background:#EDEDE7;overflow:hidden;margin:3px 0}#view-dash .qfill{height:100%;border-radius:99px}#view-dash .qrem{font-size:11px;color:var(--muted)}#view-dash .qrem.over{color:var(--absent);font-weight:600}#view-dash .vq{display:flex;gap:4px;margin-top:5px;justify-content:center}#view-dash .vqx{font-family:'Anuphan';font-size:10.5px;font-variant-numeric:tabular-nums;padding:2px 5px;border-radius:5px;
+  background:#F1F1EC;color:var(--muted);border:1px solid var(--line)}#view-dash .vqx.over{background:#FCEAE8;border-color:#F4C4BE;color:var(--absent);font-weight:600}#view-dash .badge{font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:999px;display:inline-block}#view-dash .badge.ok{background:#EAF6F0;color:var(--present)}#view-dash .badge.over{background:#FCEAE8;color:var(--absent)}#view-dash .quota-note{font-size:12px;color:var(--muted)}#view-dash .quota-note b{color:var(--ink);font-weight:600}#view-dash .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--muted)}#view-dash .legend span{display:inline-flex;align-items:center;gap:6px}#view-dash .legend i{width:11px;height:11px;border-radius:3px;display:inline-block}#view-dash .foot{text-align:center;color:var(--muted);font-size:12px;margin:26px 0 8px}#view-dash input[type=file]{display:none}#view-dash .dbbar{background:#152540;border-bottom:1px solid rgba(255,255,255,.08)}#view-dash .dbbar-in{max-width:1280px;margin:0 auto;padding:11px 24px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}#view-dash .dbbar .dblab{color:var(--orange);font-family:'Anuphan';font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin-right:2px}#view-dash .dbbar input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:#fff;border-radius:8px;padding:8px 11px;font-family:inherit;font-size:12.5px;outline:none}#view-dash .dbbar input::placeholder{color:#7C88A6}#view-dash .dbbar input.url{width:250px}#view-dash .dbbar input.key{width:170px}#view-dash .dbbar input.mon{width:150px;color-scheme:dark}#view-dash .dbbtn{font-family:inherit;font-size:12.5px;font-weight:600;border-radius:8px;padding:8px 13px;cursor:pointer;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff}#view-dash .dbbtn.go{background:var(--orange);color:var(--ink);border:none}#view-dash .dbbtn.load{background:#2E9E6B;color:#fff;border:none}#view-dash .dbbtn:hover{filter:brightness(1.08)}#view-dash .dbmsg{font-size:12px;color:#AEB8CF;margin-left:auto;max-width:100%}#view-dash .dbmsg.ok{color:#7FE0AE}#view-dash .dbmsg.err{color:#FF9E93}@media(max-width:640px){#view-dash .dbbar input.url,#view-dash .dbbar input.key{width:100%}}@media(max-width:1000px){#view-dash .kpis{grid-template-columns:repeat(3,1fr)}}@media(max-width:640px){#view-dash .kpis{grid-template-columns:repeat(2,1fr)}#view-dash .wrap{padding:16px}#view-dash thead th.hide,#view-dash tbody td.hide{display:none}
+}
+:root{
+  --navy:#1B2D51; --ink:#101F36; --orange:#FFA506; --orange-soft:#FFF3DC;
+  --bg:#EEEEEA; --panel:#FFFFFF; --line:#E3E3DC; --muted:#7A8398;
+  --present:#2E9E6B; --late:#E8912A; --sick:#C24D6B; --personal:#6B6FCB;
+  --vacation:#2E93C4; --absent:#D8453A; --dayoff:#B4BAC6; --holiday:#9AA3B5;
+  --shadow:0 1px 2px rgba(16,31,54,.06),0 8px 24px rgba(16,31,54,.06);
+}*{box-sizing:border-box}html,body{margin:0;padding:0}body{
+  font-family:'IBM Plex Sans Thai',system-ui,sans-serif;
+  background:var(--bg);color:var(--ink);
+  font-size:14px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}#view-leave .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}#view-leave h1,#view-leave h2,#view-leave h3{font-family:'Anuphan',sans-serif;margin:0;font-weight:600;letter-spacing:-.01em}#view-leave .topbar{
+  background:var(--navy);color:#fff;position:sticky;top:0;z-index:40;
+  border-bottom:3px solid var(--orange);
+}#view-leave .topbar-in{max-width:1280px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}#view-leave .brand{display:flex;align-items:center;gap:12px;margin-right:auto}#view-leave .mark{width:38px;height:38px;flex:none}#view-leave .brand .t1{font-family:'Anuphan';font-weight:700;font-size:18px;line-height:1;letter-spacing:.02em}#view-leave .brand .t2{font-size:12px;color:#AEB8CF;margin-top:3px}#view-leave .tb-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}#view-leave .select-wrap{position:relative}#view-leave select,#view-leave .btn{
+  font-family:inherit;font-size:13px;border-radius:9px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;
+  padding:9px 14px;appearance:none;
+}#view-leave select{padding-right:32px}#view-leave .select-wrap::after{content:"";position:absolute;right:12px;top:50%;width:7px;height:7px;
+  border-right:2px solid #AEB8CF;border-bottom:2px solid #AEB8CF;transform:translateY(-70%) rotate(45deg);pointer-events:none}#view-leave .btn-upload{background:var(--orange);color:var(--ink);border:none;font-weight:600}#view-leave .btn-upload:hover{filter:brightness(1.05)}#view-leave .demo-tag{font-size:11px;font-weight:600;color:var(--ink);background:var(--orange);
+  padding:4px 9px;border-radius:999px;display:none}#view-leave .demo-tag.on{display:inline-block}#view-leave .wrap{max-width:1280px;margin:0 auto;padding:24px}#view-leave .section-h{display:flex;align-items:baseline;gap:12px;margin:0 2px 12px}#view-leave .section-h h2{font-size:17px}#view-leave .section-h .sub{font-size:12.5px;color:var(--muted)}#view-leave .eyebrow{font-family:'Anuphan';font-size:11px;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--orange)}#view-leave .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:30px}#view-leave .kpi{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 16px 14px;box-shadow:var(--shadow);position:relative;overflow:hidden}#view-leave .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c,var(--navy))}#view-leave .kpi .lab{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}#view-leave .kpi .dot{width:8px;height:8px;border-radius:3px;background:var(--c,var(--navy))}#view-leave .kpi .v{font-family:'Anuphan';font-weight:700;font-size:30px;line-height:1.1;margin-top:6px;color:var(--ink)}#view-leave .kpi .v small{font-size:14px;color:var(--muted);font-weight:500}#view-leave .kpi .cap{font-size:11.5px;color:var(--muted);margin-top:2px}#view-leave .panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:20px 22px;margin-bottom:30px}#view-leave .steps{display:flex;gap:10px;align-items:flex-end;overflow-x:auto;padding:6px 2px 2px}#view-leave .step{flex:1 0 62px;min-width:62px;text-align:center;cursor:pointer;border-radius:12px;padding:8px 6px 10px;
+  transition:background .12s;border:1px solid transparent}#view-leave .step:hover{background:#F6F6F2}#view-leave .step.sel{background:var(--orange-soft);border-color:#F4D99A}#view-leave .step.future{opacity:.35;pointer-events:none}#view-leave .step .date{font-size:11px;color:var(--muted)}#view-leave .step .date b{color:var(--ink);font-weight:600}#view-leave .bar-track{height:96px;display:flex;align-items:flex-end;justify-content:center;margin:6px 0 6px}#view-leave .bar{width:26px;background:var(--navy);border-radius:6px 6px 3px 3px;min-height:4px;position:relative;transition:height .3s ease}#view-leave .step.sel .bar{background:var(--orange)}#view-leave .step .cnt{font-family:'Anuphan';font-weight:700;font-size:16px;line-height:1}#view-leave .day-detail{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center}#view-leave .day-detail .dh{font-size:13px;font-weight:600;color:var(--ink);margin-right:6px}#view-leave .chip{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;background:#F6F6F2;border:1px solid var(--line);
+  padding:5px 11px;border-radius:999px}#view-leave .chip .cd{width:9px;height:9px;border-radius:3px}#view-leave .chip b{font-family:'Anuphan';font-variant-numeric:tabular-nums}#view-leave .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}#view-leave .field{background:var(--panel);border:1px solid var(--line);border-radius:11px;display:flex;align-items:center;gap:8px;padding:0 12px;box-shadow:var(--shadow)}#view-leave .field svg{color:var(--muted);flex:none}#view-leave .field input,#view-leave .field select{background:transparent;border:none;color:var(--ink);padding:11px 4px;font-family:inherit;font-size:13.5px;outline:none;min-width:150px}#view-leave .field select{cursor:pointer;padding-right:20px}#view-leave .field.grow{flex:1;min-width:200px}#view-leave .controls .btn.exp{background:var(--navy);border-color:var(--navy);margin-left:auto}#view-leave .controls .btn.exp:hover{background:var(--ink)}#view-leave .tbl-wrap{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}#view-leave table{width:100%;border-collapse:collapse;font-size:13px}#view-leave thead th{background:#F7F7F3;color:var(--muted);font-weight:600;font-size:11.5px;letter-spacing:.02em;
+  text-align:center;padding:12px 8px;border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0}#view-leave thead th.l{text-align:left;padding-left:20px}#view-leave tbody td{padding:12px 8px;border-bottom:1px solid #F0F0EA;text-align:center;vertical-align:middle}#view-leave tbody tr:last-child td{border-bottom:none}#view-leave tbody tr.emp-row{cursor:pointer}#view-leave tbody tr.emp-row:hover{background:#FBFAF6}#view-leave .idx{color:var(--muted);font-size:12px}#view-leave .who{text-align:left;padding-left:20px}#view-leave .who .nm{font-weight:600;color:var(--ink)}#view-leave .who .nm .nick{color:var(--orange);font-weight:600}#view-leave .who .role{font-size:11.5px;color:var(--muted);margin-top:1px}#view-leave .stat{font-family:'Anuphan';font-weight:600;font-variant-numeric:tabular-nums;font-size:14.5px}#view-leave .stat.z{color:#CBCEC7;font-weight:500}#view-leave .stat.present{color:var(--present)}#view-leave .stat.late{color:var(--late)}#view-leave .stat.sick{color:var(--sick)}#view-leave .stat.personal{color:var(--personal)}#view-leave .stat.vacation{color:var(--vacation)}#view-leave .stat.absent{color:var(--absent)}#view-leave .rate{display:flex;align-items:center;gap:8px;justify-content:flex-end;padding-right:16px}#view-leave .rate .rbar{width:64px;height:7px;border-radius:99px;background:#EDEDE7;overflow:hidden}#view-leave .rate .rfill{height:100%;border-radius:99px}#view-leave .rate .rv{font-family:'Anuphan';font-weight:600;font-variant-numeric:tabular-nums;width:44px;text-align:right}#view-leave .tl-row td{padding:0;background:#FAFAF6}#view-leave .tl{padding:14px 20px 18px;display:none}#view-leave .tl.open{display:block}#view-leave .tl .tl-h{font-size:12px;color:var(--muted);margin-bottom:9px}#view-leave .tl-grid{display:flex;flex-wrap:wrap;gap:5px}#view-leave .cell{width:34px;height:40px;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:11px;border:1px solid var(--line);background:#fff}#view-leave .cell .d{font-size:9px;color:var(--muted);line-height:1}#view-leave .cell .m{font-family:'Anuphan';font-weight:600;font-size:12px;line-height:1.3}#view-leave .cell.present{background:#EAF6F0;border-color:#BFE6D3;color:var(--present)}#view-leave .cell.late{background:#FDF1E1;border-color:#F6D9AF;color:var(--late)}#view-leave .cell.sick{background:#FBEBF0;border-color:#F0C6D3;color:var(--sick)}#view-leave .cell.personal{background:#EDEDFA;border-color:#CBCCF0;color:var(--personal)}#view-leave .cell.vacation{background:#E8F4FA;border-color:#BEE0F0;color:var(--vacation)}#view-leave .cell.absent{background:#FCEAE8;border-color:#F4C4BE;color:var(--absent)}#view-leave .cell.dayoff{background:#F3F3F0;color:var(--dayoff)}#view-leave .cell.holiday{background:#F3F3F0;color:var(--holiday)}#view-leave .cell.empty{background:#fff;color:#D9D9D2}#view-leave .empty-state{text-align:center;padding:70px 20px;color:var(--muted)}#view-leave .empty-state h3{font-size:18px;color:var(--ink);margin-bottom:8px}#view-leave .qcell{min-width:96px}#view-leave .qtop{font-size:12px;color:var(--muted)}#view-leave .qtop b{font-family:'Anuphan';font-size:16px;color:var(--ink)}#view-leave .qtop b.over{color:var(--absent)}#view-leave .qtrack{height:6px;border-radius:99px;background:#EDEDE7;overflow:hidden;margin:3px 0}#view-leave .qfill{height:100%;border-radius:99px}#view-leave .qrem{font-size:11px;color:var(--muted)}#view-leave .qrem.over{color:var(--absent);font-weight:600}#view-leave .vq{display:flex;gap:4px;margin-top:5px;justify-content:center}#view-leave .vqx{font-family:'Anuphan';font-size:10.5px;font-variant-numeric:tabular-nums;padding:2px 5px;border-radius:5px;
+  background:#F1F1EC;color:var(--muted);border:1px solid var(--line)}#view-leave .vqx.over{background:#FCEAE8;border-color:#F4C4BE;color:var(--absent);font-weight:600}#view-leave .badge{font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:999px;display:inline-block}#view-leave .badge.ok{background:#EAF6F0;color:var(--present)}#view-leave .badge.over{background:#FCEAE8;color:var(--absent)}#view-leave .quota-note{font-size:12px;color:var(--muted)}#view-leave .quota-note b{color:var(--ink);font-weight:600}#view-leave .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--muted)}#view-leave .legend span{display:inline-flex;align-items:center;gap:6px}#view-leave .legend i{width:11px;height:11px;border-radius:3px;display:inline-block}#view-leave .foot{text-align:center;color:var(--muted);font-size:12px;margin:26px 0 8px}#view-leave input[type=file]{display:none}#view-leave .dbbar{background:#152540;border-bottom:1px solid rgba(255,255,255,.08)}#view-leave .dbbar-in{max-width:1280px;margin:0 auto;padding:11px 24px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}#view-leave .dbbar .dblab{color:var(--orange);font-family:'Anuphan';font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin-right:2px}#view-leave .dbbar input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:#fff;border-radius:8px;padding:8px 11px;font-family:inherit;font-size:12.5px;outline:none}#view-leave .dbbar input::placeholder{color:#7C88A6}#view-leave .dbbar input.url{width:250px}#view-leave .dbbar input.key{width:170px}#view-leave .dbbar input.mon{width:150px;color-scheme:dark}#view-leave .dbbtn{font-family:inherit;font-size:12.5px;font-weight:600;border-radius:8px;padding:8px 13px;cursor:pointer;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff}#view-leave .dbbtn.go{background:var(--orange);color:var(--ink);border:none}#view-leave .dbbtn.load{background:#2E9E6B;color:#fff;border:none}#view-leave .dbbtn:hover{filter:brightness(1.08)}#view-leave .dbmsg{font-size:12px;color:#AEB8CF;margin-left:auto;max-width:100%}#view-leave .dbmsg.ok{color:#7FE0AE}#view-leave .dbmsg.err{color:#FF9E93}@media(max-width:640px){#view-leave .dbbar input.url,#view-leave .dbbar input.key{width:100%}}@media(max-width:1000px){#view-leave .kpis{grid-template-columns:repeat(3,1fr)}}@media(max-width:640px){#view-leave .kpis{grid-template-columns:repeat(2,1fr)}#view-leave .wrap{padding:16px}#view-leave thead th.hide,#view-leave tbody td.hide{display:none}
+}
+:root{
+  --navy:#1B2D51; --ink:#101F36; --orange:#FFA506; --orange-soft:#FFF3DC;
+  --bg:#EEEEEA; --panel:#FFFFFF; --line:#E3E3DC; --muted:#7A8398;
+  --present:#2E9E6B; --late:#E8912A; --sick:#C24D6B; --personal:#6B6FCB;
+  --vacation:#2E93C4; --absent:#D8453A; --dayoff:#B4BAC6; --holiday:#9AA3B5;
+  --shadow:0 1px 2px rgba(16,31,54,.06),0 8px 24px rgba(16,31,54,.06);
+}*{box-sizing:border-box}html,body{margin:0;padding:0}body{
+  font-family:'IBM Plex Sans Thai',system-ui,sans-serif;
+  background:var(--bg);color:var(--ink);
+  font-size:14px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}#view-employees .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}#view-employees h1,#view-employees h2,#view-employees h3{font-family:'Anuphan',sans-serif;margin:0;font-weight:600;letter-spacing:-.01em}#view-employees .topbar{
+  background:var(--navy);color:#fff;position:sticky;top:0;z-index:40;
+  border-bottom:3px solid var(--orange);
+}#view-employees .topbar-in{max-width:1280px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}#view-employees .brand{display:flex;align-items:center;gap:12px;margin-right:auto}#view-employees .mark{width:38px;height:38px;flex:none}#view-employees .brand .t1{font-family:'Anuphan';font-weight:700;font-size:18px;line-height:1;letter-spacing:.02em}#view-employees .brand .t2{font-size:12px;color:#AEB8CF;margin-top:3px}#view-employees .tb-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}#view-employees .select-wrap{position:relative}#view-employees select,#view-employees .btn{
+  font-family:inherit;font-size:13px;border-radius:9px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;
+  padding:9px 14px;appearance:none;
+}#view-employees select{padding-right:32px}#view-employees .select-wrap::after{content:"";position:absolute;right:12px;top:50%;width:7px;height:7px;
+  border-right:2px solid #AEB8CF;border-bottom:2px solid #AEB8CF;transform:translateY(-70%) rotate(45deg);pointer-events:none}#view-employees .btn-upload{background:var(--orange);color:var(--ink);border:none;font-weight:600}#view-employees .btn-upload:hover{filter:brightness(1.05)}#view-employees .demo-tag{font-size:11px;font-weight:600;color:var(--ink);background:var(--orange);
+  padding:4px 9px;border-radius:999px;display:none}#view-employees .demo-tag.on{display:inline-block}#view-employees .wrap{max-width:1280px;margin:0 auto;padding:24px}#view-employees .section-h{display:flex;align-items:baseline;gap:12px;margin:0 2px 12px}#view-employees .section-h h2{font-size:17px}#view-employees .section-h .sub{font-size:12.5px;color:var(--muted)}#view-employees .eyebrow{font-family:'Anuphan';font-size:11px;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--orange)}#view-employees .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:30px}#view-employees .kpi{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 16px 14px;box-shadow:var(--shadow);position:relative;overflow:hidden}#view-employees .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c,var(--navy))}#view-employees .kpi .lab{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}#view-employees .kpi .dot{width:8px;height:8px;border-radius:3px;background:var(--c,var(--navy))}#view-employees .kpi .v{font-family:'Anuphan';font-weight:700;font-size:30px;line-height:1.1;margin-top:6px;color:var(--ink)}#view-employees .kpi .v small{font-size:14px;color:var(--muted);font-weight:500}#view-employees .kpi .cap{font-size:11.5px;color:var(--muted);margin-top:2px}#view-employees .panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:20px 22px;margin-bottom:30px}#view-employees .steps{display:flex;gap:10px;align-items:flex-end;overflow-x:auto;padding:6px 2px 2px}#view-employees .step{flex:1 0 62px;min-width:62px;text-align:center;cursor:pointer;border-radius:12px;padding:8px 6px 10px;
+  transition:background .12s;border:1px solid transparent}#view-employees .step:hover{background:#F6F6F2}#view-employees .step.sel{background:var(--orange-soft);border-color:#F4D99A}#view-employees .step.future{opacity:.35;pointer-events:none}#view-employees .step .date{font-size:11px;color:var(--muted)}#view-employees .step .date b{color:var(--ink);font-weight:600}#view-employees .bar-track{height:96px;display:flex;align-items:flex-end;justify-content:center;margin:6px 0 6px}#view-employees .bar{width:26px;background:var(--navy);border-radius:6px 6px 3px 3px;min-height:4px;position:relative;transition:height .3s ease}#view-employees .step.sel .bar{background:var(--orange)}#view-employees .step .cnt{font-family:'Anuphan';font-weight:700;font-size:16px;line-height:1}#view-employees .day-detail{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center}#view-employees .day-detail .dh{font-size:13px;font-weight:600;color:var(--ink);margin-right:6px}#view-employees .chip{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;background:#F6F6F2;border:1px solid var(--line);
+  padding:5px 11px;border-radius:999px}#view-employees .chip .cd{width:9px;height:9px;border-radius:3px}#view-employees .chip b{font-family:'Anuphan';font-variant-numeric:tabular-nums}#view-employees .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}#view-employees .field{background:var(--panel);border:1px solid var(--line);border-radius:11px;display:flex;align-items:center;gap:8px;padding:0 12px;box-shadow:var(--shadow)}#view-employees .field svg{color:var(--muted);flex:none}#view-employees .field input,#view-employees .field select{background:transparent;border:none;color:var(--ink);padding:11px 4px;font-family:inherit;font-size:13.5px;outline:none;min-width:150px}#view-employees .field select{cursor:pointer;padding-right:20px}#view-employees .field.grow{flex:1;min-width:200px}#view-employees .controls .btn.exp{background:var(--navy);border-color:var(--navy);margin-left:auto}#view-employees .controls .btn.exp:hover{background:var(--ink)}#view-employees .tbl-wrap{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}#view-employees table{width:100%;border-collapse:collapse;font-size:13px}#view-employees thead th{background:#F7F7F3;color:var(--muted);font-weight:600;font-size:11.5px;letter-spacing:.02em;
+  text-align:center;padding:12px 8px;border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0}#view-employees thead th.l{text-align:left;padding-left:20px}#view-employees tbody td{padding:12px 8px;border-bottom:1px solid #F0F0EA;text-align:center;vertical-align:middle}#view-employees tbody tr:last-child td{border-bottom:none}#view-employees tbody tr.emp-row{cursor:pointer}#view-employees tbody tr.emp-row:hover{background:#FBFAF6}#view-employees .idx{color:var(--muted);font-size:12px}#view-employees .who{text-align:left;padding-left:20px}#view-employees .who .nm{font-weight:600;color:var(--ink)}#view-employees .who .nm .nick{color:var(--orange);font-weight:600}#view-employees .who .role{font-size:11.5px;color:var(--muted);margin-top:1px}#view-employees .stat{font-family:'Anuphan';font-weight:600;font-variant-numeric:tabular-nums;font-size:14.5px}#view-employees .stat.z{color:#CBCEC7;font-weight:500}#view-employees .stat.present{color:var(--present)}#view-employees .stat.late{color:var(--late)}#view-employees .stat.sick{color:var(--sick)}#view-employees .stat.personal{color:var(--personal)}#view-employees .stat.vacation{color:var(--vacation)}#view-employees .stat.absent{color:var(--absent)}#view-employees .rate{display:flex;align-items:center;gap:8px;justify-content:flex-end;padding-right:16px}#view-employees .rate .rbar{width:64px;height:7px;border-radius:99px;background:#EDEDE7;overflow:hidden}#view-employees .rate .rfill{height:100%;border-radius:99px}#view-employees .rate .rv{font-family:'Anuphan';font-weight:600;font-variant-numeric:tabular-nums;width:44px;text-align:right}#view-employees .tl-row td{padding:0;background:#FAFAF6}#view-employees .tl{padding:14px 20px 18px;display:none}#view-employees .tl.open{display:block}#view-employees .tl .tl-h{font-size:12px;color:var(--muted);margin-bottom:9px}#view-employees .tl-grid{display:flex;flex-wrap:wrap;gap:5px}#view-employees .cell{width:34px;height:40px;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:11px;border:1px solid var(--line);background:#fff}#view-employees .cell .d{font-size:9px;color:var(--muted);line-height:1}#view-employees .cell .m{font-family:'Anuphan';font-weight:600;font-size:12px;line-height:1.3}#view-employees .cell.present{background:#EAF6F0;border-color:#BFE6D3;color:var(--present)}#view-employees .cell.late{background:#FDF1E1;border-color:#F6D9AF;color:var(--late)}#view-employees .cell.sick{background:#FBEBF0;border-color:#F0C6D3;color:var(--sick)}#view-employees .cell.personal{background:#EDEDFA;border-color:#CBCCF0;color:var(--personal)}#view-employees .cell.vacation{background:#E8F4FA;border-color:#BEE0F0;color:var(--vacation)}#view-employees .cell.absent{background:#FCEAE8;border-color:#F4C4BE;color:var(--absent)}#view-employees .cell.dayoff{background:#F3F3F0;color:var(--dayoff)}#view-employees .cell.holiday{background:#F3F3F0;color:var(--holiday)}#view-employees .cell.empty{background:#fff;color:#D9D9D2}#view-employees .empty-state{text-align:center;padding:70px 20px;color:var(--muted)}#view-employees .empty-state h3{font-size:18px;color:var(--ink);margin-bottom:8px}#view-employees .qcell{min-width:96px}#view-employees .qtop{font-size:12px;color:var(--muted)}#view-employees .qtop b{font-family:'Anuphan';font-size:16px;color:var(--ink)}#view-employees .qtop b.over{color:var(--absent)}#view-employees .qtrack{height:6px;border-radius:99px;background:#EDEDE7;overflow:hidden;margin:3px 0}#view-employees .qfill{height:100%;border-radius:99px}#view-employees .qrem{font-size:11px;color:var(--muted)}#view-employees .qrem.over{color:var(--absent);font-weight:600}#view-employees .vq{display:flex;gap:4px;margin-top:5px;justify-content:center}#view-employees .vqx{font-family:'Anuphan';font-size:10.5px;font-variant-numeric:tabular-nums;padding:2px 5px;border-radius:5px;
+  background:#F1F1EC;color:var(--muted);border:1px solid var(--line)}#view-employees .vqx.over{background:#FCEAE8;border-color:#F4C4BE;color:var(--absent);font-weight:600}#view-employees .badge{font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:999px;display:inline-block}#view-employees .badge.ok{background:#EAF6F0;color:var(--present)}#view-employees .badge.over{background:#FCEAE8;color:var(--absent)}#view-employees .quota-note{font-size:12px;color:var(--muted)}#view-employees .quota-note b{color:var(--ink);font-weight:600}#view-employees .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--muted)}#view-employees .legend span{display:inline-flex;align-items:center;gap:6px}#view-employees .legend i{width:11px;height:11px;border-radius:3px;display:inline-block}#view-employees .foot{text-align:center;color:var(--muted);font-size:12px;margin:26px 0 8px}#view-employees input[type=file]{display:none}#view-employees .dbbar{background:#152540;border-bottom:1px solid rgba(255,255,255,.08)}#view-employees .dbbar-in{max-width:1280px;margin:0 auto;padding:11px 24px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}#view-employees .dbbar .dblab{color:var(--orange);font-family:'Anuphan';font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin-right:2px}#view-employees .dbbar input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:#fff;border-radius:8px;padding:8px 11px;font-family:inherit;font-size:12.5px;outline:none}#view-employees .dbbar input::placeholder{color:#7C88A6}#view-employees .dbbar input.url{width:250px}#view-employees .dbbar input.key{width:170px}#view-employees .dbbar input.mon{width:150px;color-scheme:dark}#view-employees .dbbtn{font-family:inherit;font-size:12.5px;font-weight:600;border-radius:8px;padding:8px 13px;cursor:pointer;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff}#view-employees .dbbtn.go{background:var(--orange);color:var(--ink);border:none}#view-employees .dbbtn.load{background:#2E9E6B;color:#fff;border:none}#view-employees .dbbtn:hover{filter:brightness(1.08)}#view-employees .dbmsg{font-size:12px;color:#AEB8CF;margin-left:auto;max-width:100%}#view-employees .dbmsg.ok{color:#7FE0AE}#view-employees .dbmsg.err{color:#FF9E93}@media(max-width:640px){#view-employees .dbbar input.url,#view-employees .dbbar input.key{width:100%}}@media(max-width:1000px){#view-employees .kpis{grid-template-columns:repeat(3,1fr)}}@media(max-width:640px){#view-employees .kpis{grid-template-columns:repeat(2,1fr)}#view-employees .wrap{padding:16px}#view-employees thead th.hide,#view-employees tbody td.hide{display:none}
+}
+
+:root{
+  --navy:#1B2D51; --ink:#101F36; --orange:#FFA506; --orange-soft:#FFF3DC;
+  --bg:#EEEEEA; --panel:#FFFFFF; --line:#E3E3DC; --muted:#7A8398;
+  --present:#2E9E6B; --late:#E8912A; --sick:#C24D6B; --personal:#6B6FCB;
+  --vacation:#2E93C4; --absent:#D8453A; --dayoff:#B4BAC6; --holiday:#9AA3B5;
+  --shadow:0 1px 2px rgba(16,31,54,.06),0 8px 24px rgba(16,31,54,.06);
+}*{box-sizing:border-box}html,body{margin:0;padding:0}body{font-family:'IBM Plex Sans Thai',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}#view-grid .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}#view-grid h1,#view-grid h2{font-family:'Anuphan';margin:0;font-weight:600;letter-spacing:-.01em}#view-grid .topbar{background:var(--navy);color:#fff;position:sticky;top:0;z-index:60;border-bottom:3px solid var(--orange)}#view-grid .topbar-in{max-width:1400px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}#view-grid .brand{display:flex;align-items:center;gap:11px;margin-right:auto}#view-grid .mark{width:34px;height:34px}#view-grid .brand .t1{font-family:'Anuphan';font-weight:700;font-size:17px;line-height:1;letter-spacing:.02em}#view-grid .brand .t2{font-size:11.5px;color:#AEB8CF;margin-top:3px}#view-grid .mode-tag{font-size:11px;font-weight:600;color:var(--ink);background:var(--orange);padding:4px 10px;border-radius:999px}#view-grid .mode-tag.live{background:#2E9E6B;color:#fff}#view-grid .dbbar{background:#152540;border-bottom:1px solid rgba(255,255,255,.08)}#view-grid .dbbar-in{max-width:1400px;margin:0 auto;padding:10px 22px;display:flex;gap:9px;align-items:center;flex-wrap:wrap}#view-grid .dblab{color:var(--orange);font-family:'Anuphan';font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase}#view-grid .dbbar input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:#fff;border-radius:8px;padding:7px 10px;font-family:inherit;font-size:12.5px;outline:none}#view-grid .dbbar input::placeholder{color:#7C88A6}#view-grid .dbbar input.url{width:230px}#view-grid .dbbar input.key{width:150px}#view-grid .dbbar input.mon{width:140px;color-scheme:dark}#view-grid .dbbtn{font-family:inherit;font-size:12.5px;font-weight:600;border-radius:8px;padding:7px 12px;cursor:pointer;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff}#view-grid .dbbtn.go{background:var(--orange);color:var(--ink);border:none}#view-grid .dbbtn.load{background:#2E9E6B;color:#fff;border:none}#view-grid .dbbtn:hover{filter:brightness(1.08)}#view-grid .dbmsg{font-size:12px;color:#AEB8CF;margin-left:auto}#view-grid .dbmsg.ok{color:#7FE0AE}#view-grid .dbmsg.err{color:#FF9E93}#view-grid .wrap{max-width:1400px;margin:0 auto;padding:18px 22px}#view-grid .toolbar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px}#view-grid .brushes{display:flex;gap:6px;flex-wrap:wrap;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:7px 9px;box-shadow:var(--shadow)}#view-grid .brushes .lbl{font-size:12px;color:var(--muted);margin-right:2px}#view-grid .brush{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;border:1.5px solid var(--line);background:#fff;border-radius:9px;padding:6px 10px;cursor:pointer;font-family:inherit}#view-grid .brush .sw{width:15px;height:15px;border-radius:4px;font-family:'Anuphan';font-weight:700;font-size:10px;display:flex;align-items:center;justify-content:center;color:#fff}#view-grid .brush.active{border-color:var(--ink);box-shadow:0 0 0 2px rgba(16,31,54,.08)}#view-grid .brush.eraser .sw{background:#fff;border:1px solid var(--line);color:var(--muted)}#view-grid .save-ind{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:7px;margin-left:auto}#view-grid .save-ind .d{width:9px;height:9px;border-radius:50%;background:#CBCEC7}#view-grid .save-ind.saving .d{background:var(--late);animation:pulse 1s infinite}#view-grid .save-ind.saved .d{background:var(--present)}#view-grid .save-ind.err .d{background:var(--absent)}@keyframes pulse{50%{opacity:.35}}#view-grid .addbtn{font-family:inherit;font-size:12.5px;font-weight:600;border:1px dashed var(--navy);color:var(--navy);background:#fff;border-radius:9px;padding:8px 12px;cursor:pointer}#view-grid .addbtn:hover{background:var(--orange-soft)}#view-grid .grid-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:auto;max-height:74vh}#view-grid table.grid{border-collapse:separate;border-spacing:0;font-size:12.5px}#view-grid .grid th,#view-grid .grid td{border-right:1px solid #F0F0EA;border-bottom:1px solid #F0F0EA;text-align:center;white-space:nowrap}#view-grid .grid thead th{position:sticky;top:0;z-index:5;background:#F7F7F3;color:var(--muted);font-weight:600;font-size:11px;padding:7px 4px;height:44px}#view-grid .grid thead th.wknd{background:#EFEFE9;color:var(--absent)}#view-grid .grid th.hcol{min-width:34px}#view-grid .grid th.dnum{font-family:'Anuphan';font-size:13px;color:var(--ink)}#view-grid .grid th.dow{font-weight:500}#view-grid .cn{position:sticky;z-index:4;background:var(--panel)}#view-grid .c-idx{left:0;width:34px;min-width:34px}#view-grid .c-name{left:34px;min-width:190px;max-width:190px;text-align:left}#view-grid .c-sum{left:224px;width:46px;min-width:46px}#view-grid .grid thead th.cn{z-index:7;background:#F7F7F3}#view-grid .grid tbody td.cn{border-bottom:1px solid #F0F0EA}#view-grid td.c-name{padding:5px 10px}#view-grid td.c-name .nm{font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px}#view-grid td.c-name .nm .nick{color:var(--orange)}#view-grid td.c-name .role{font-size:10.5px;color:var(--muted)}#view-grid td.c-sum{font-family:'Anuphan';font-weight:700;color:var(--present);font-size:14px}#view-grid tbody tr:hover td.cn{background:#FBFAF6}#view-grid td.cell{width:30px;min-width:30px;height:34px;cursor:pointer;font-family:'Anuphan';font-weight:600;user-select:none;color:var(--ink)}#view-grid td.cell:hover{outline:2px solid var(--orange);outline-offset:-2px}#view-grid td.cell.present{background:#EAF6F0;color:var(--present)}#view-grid td.cell.late{background:#FDF1E1;color:var(--late)}#view-grid td.cell.sick{background:#FBEBF0;color:var(--sick)}#view-grid td.cell.personal{background:#EDEDFA;color:var(--personal)}#view-grid td.cell.vacation{background:#E8F4FA;color:var(--vacation)}#view-grid td.cell.absent{background:#FCEAE8;color:var(--absent)}#view-grid td.cell.dayoff{background:#F3F3F0;color:var(--dayoff)}#view-grid td.cell.holiday{background:#F3F3F0;color:var(--holiday)}#view-grid td.cell.wknd{background:#FAFAF6}#view-grid td.cell{position:relative}#view-grid td.cell.has-note::after{content:"";position:absolute;top:1px;right:1px;border-top:7px solid var(--orange);border-left:7px solid transparent}#view-grid .brush.note .sw{color:#fff}#view-grid td.cell.flash{animation:flash .8s}@keyframes flash{0%{box-shadow:inset 0 0 0 3px var(--orange)}100%{box-shadow:none}}#view-grid .grid tfoot td{position:sticky;bottom:0;z-index:5;background:#F2F5F8;font-family:'Anuphan';font-weight:600;color:var(--navy);font-size:12px;padding:7px 3px}#view-grid .grid tfoot td.cn{z-index:7}#view-grid .grid tfoot td.foot-lab{text-align:right;padding-right:10px;color:var(--muted);font-weight:600}#view-grid .legend{display:flex;gap:13px;flex-wrap:wrap;margin-top:13px;font-size:12px;color:var(--muted)}#view-grid .legend span{display:inline-flex;align-items:center;gap:6px}#view-grid .legend i{width:11px;height:11px;border-radius:3px}#view-grid .hint{font-size:12.5px;color:var(--muted);margin:2px 0 12px}#view-grid .hint b{color:var(--ink)}
+
+
+#view-employees .emp-form{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:18px 20px;margin-bottom:16px}
+#view-employees .emp-form h3{font-family:'Anuphan';font-size:15px;margin:0 0 14px;color:var(--ink)}
+#view-employees .ef-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+#view-employees .ef-f{display:flex;flex-direction:column;gap:4px}
+#view-employees .ef-f label{font-size:12px;color:var(--muted)}
+#view-employees .ef-f label .req{color:var(--absent)}
+#view-employees .ef-f input{font-family:inherit;font-size:13.5px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);outline:none}
+#view-employees .ef-f input:focus{border-color:var(--orange)}
+#view-employees .ef-actions{display:flex;gap:8px;margin-top:16px}
+#view-employees .ebtn{font-family:inherit;font-size:13px;font-weight:600;border-radius:9px;padding:9px 16px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink)}
+#view-employees .ebtn.save{background:var(--navy);border-color:var(--navy);color:#fff}
+#view-employees .ebtn.save:hover{background:var(--ink)}
+#view-employees .ebtn:hover{background:#F6F6F2}
+#view-employees .act{display:inline-flex;gap:6px}
+#view-employees .act button{font-family:inherit;font-size:12px;border:1px solid var(--line);background:#fff;border-radius:7px;padding:5px 10px;cursor:pointer;color:var(--ink)}
+#view-employees .act button:hover{background:#F6F6F2}
+#view-employees .act .del{color:var(--absent);border-color:#F0C6C0}
+#view-employees .act .resign{color:var(--late)}
+#view-employees .act .restore{color:var(--present)}
+#view-employees .pill{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px}
+#view-employees .pill.on{background:#EAF6F0;color:var(--present)}
+#view-employees .pill.off{background:#FCEAE8;color:var(--absent)}
+
+/* ===== unified shell (global) ===== */
+.tabbar{background:var(--navy);color:#fff;position:sticky;top:0;z-index:80;border-bottom:3px solid var(--orange)}
+.tabbar-in{max-width:1400px;margin:0 auto;padding:0 22px;display:flex;align-items:center;gap:14px}
+.tabbar .brand{display:flex;align-items:center;gap:11px;padding:11px 0}
+.tabbar .mark{width:32px;height:32px}
+.tabbar .t1{font-family:'Anuphan';font-weight:700;font-size:16px;line-height:1;letter-spacing:.02em}
+.tabbar .t2{font-size:11px;color:#AEB8CF;margin-top:3px}
+.tabs{display:flex;gap:2px;margin-left:6px}
+.tab{font-family:'Anuphan';font-weight:600;font-size:14.5px;color:#AEB8CF;background:none;border:none;padding:16px 16px 13px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-3px}
+.tab:hover{color:#fff}
+.tab.active{color:#fff;border-bottom-color:var(--orange)}
+.view{display:none}
+.view.active{display:block}
+.view > .topbar{position:static;top:auto;z-index:1}
+#view-grid > .topbar{display:none}                 /* ซ่อนแถบซ้ำของ grid (โลโก้ DAIKI ที่ 2) */
+#view-dash > .topbar .brand{display:none}          /* ซ่อนโลโก้ซ้ำฝั่งแดชบอร์ด (เหลือแค่ปุ่มอัปโหลด/เลือกชีต) */
+.view > .dbbar{position:static}
+.view > .dbbar .dbbar-in input.url,.view > .dbbar .dbbar-in input.key{display:none}
+.view > .dbbar .dbbtn.go{display:none}
+
+</style>
+</head>
+<body>
+<div class="tabbar"><div class="tabbar-in"><div class="brand"><svg class="mark" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#FFA506" d="M64 4c26 0 44 16 44 33s-15 30-38 30l-9 0 0 22-14-8 0-63c5-9 8-14 17-14z M70 26c9 0 15 6 15 12s-7 12-16 12-14-5-14-12 6-12 15-12z"/><path fill="#1B2D51" d="M22 46 74 76 62 98 10 68z"/><path fill="#1B2D51" d="M6 66 52 92 40 104 -6 78z" transform="translate(14 4)"/><path fill="#1B2D51" d="M84 60 98 68 98 96 84 88z"/></svg><div><div class="t1">DAIKI</div><div class="t2">ระบบบันทึกการมาทำงาน</div></div></div><div class="tabs"><button class="tab active" data-tab="grid">กรอกข้อมูล</button><button class="tab" data-tab="dash">แดชบอร์ด</button><button class="tab" data-tab="leave">สิทธิการลา</button><button class="tab" data-tab="employees">ข้อมูลพนักงาน</button></div></div></div>
+<section id="view-grid" class="view active">
+
+<div class="topbar"><div class="topbar-in">
+  <div class="brand">
+    <svg class="mark" viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path fill="#FFA506" d="M64 4c26 0 44 16 44 33s-15 30-38 30l-9 0 0 22-14-8 0-63c5-9 8-14 17-14z M70 26c9 0 15 6 15 12s-7 12-16 12-14-5-14-12 6-12 15-12z"/>
+      <path fill="#1B2D51" d="M22 46 74 76 62 98 10 68z"/>
+      <path fill="#1B2D51" d="M6 66 52 92 40 104 -6 78z" transform="translate(14 4)"/>
+      <path fill="#1B2D51" d="M84 60 98 68 98 96 84 88z"/>
+    </svg>
+    <div><div class="t1">DAIKI</div><div class="t2">กรอกการมาทำงานรายวัน</div></div>
+  </div>
+  <span class="mode-tag" id="modeTag">โหมดทดลอง (ไม่บันทึก)</span>
+</div></div>
+
+<div class="dbbar"><div class="dbbar-in">
+  <span class="dblab">ฐานข้อมูล</span>
+  <input class="url" id="dbUrl" placeholder="Supabase URL">
+  <input class="key" id="dbKey" type="password" placeholder="anon key">
+  <button class="dbbtn go" id="dbConnect">เชื่อมต่อ</button>
+  <button class="dbbtn" id="mPrev" title="เดือนก่อนหน้า">◀</button>
+  <input class="mon" id="dbMonth" type="month">
+  <button class="dbbtn" id="mNext" title="เดือนถัดไป">▶</button>
+  <button class="dbbtn load" id="dbLoad">โหลดเดือนนี้</button>
+  <span class="dbmsg" id="dbMsg">โหมดทดลอง — เชื่อมต่อ Supabase เพื่อบันทึกจริงและ sync แบบ realtime</span>
+</div></div>
+
+<div class="wrap">
+  <div class="toolbar">
+    <div class="brushes"><span class="lbl">เครื่องมือ:</span><span id="brushList"></span></div>
+    <button class="addbtn" id="addEmp">＋ เพิ่มพนักงาน</button>
+    <div class="save-ind" id="saveInd"><span class="d"></span><span id="saveTxt">พร้อม</span></div>
+  </div>
+  <div class="hint">เลือกเครื่องมือด้านบน แล้ว <b>คลิก</b> หรือ <b>คลิกค้างลากผ่าน</b> ช่องเพื่อกรอก · เลือก <b>ล้าง</b> เพื่อลบ · <span id="rtHint">เชื่อม DB แล้วทุกการแก้จะบันทึกและ sync อัตโนมัติ</span></div>
+
+  <div class="grid-wrap"><table class="grid" id="grid"></table></div>
+  <div class="legend" id="legend"></div>
+</div>
+
+<script id="sampleData" type="application/json">{"y": 2026, "m": 7, "employees": [{"code": "LK-211", "name": "นายสิทธิ์ เทพศิริ", "nick": "สี", "pos": "พนักงานทั่วไป", "cells": {"1": "1", "2": "1", "3": "1", "4": "1", "5": "w", "6": "1", "7": "1", "8": "1", "9": "1", "10": "1", "11": "1", "12": "w", "13": "1", "14": "1", "15": "1", "16": "1", "17": "1", "18": "1", "19": "w", "20": "1", "21": "1", "22": "1", "23": "1", "24": "1", "25": "1"}}, {"code": "DK-212", "name": "นายชนกรรณภ์ กลิ่นประยูร", "nick": "ต้น", "pos": "พนักงานขับรถ", "cells": {"1": "1", "2": "1", "3": "1", "4": "w", "5": "1", "6": "1", "7": "1", "8": "1", "9": "1", "10": "1", "11": "1", "12": "1", "13": "1", "14": "1", "15": "1", "16": "1", "17": "1", "18": "1", "19": "1", "20": "w", "21": "1", "22": "1", "23": "1", "24": "1", "25": "1"}}, {"code": "DK-210", "name": "นางสาวณัฐกานต์  ปิ่นเกล้า", "nick": "ส้ม", "pos": "สินค้าตีกลับ", "cells": {"1": "1", "2": "1", "3": "1", "4": "w", "5": "1", "6": "1", "7": "1", "8": "1", "9": "1", "10": "1", "11": "w", "12": "1", "13": "1", "14": "1", "15": "1", "16": "1", "17": "1", "18": "w", "19": "1", "20": "1", "21": "1", "22": "ป", "23": "ป", "24": "1", "25": "w"}}, {"code": "DK-209", "name": "นางสาวนิติกาญจน์ แก้วเกล็ด", "nick": "ตาล", "pos": "สินค้าตีกลับ", "cells": {"1": "1", "2": "1", "3": "w", "4": "ก", "5": "ป", "6": "1", "7": "1", "8": "1", "9": "1", "10": "w", "11": "1", "12": "ป", "13": "1", "14": "1", "15": "1", "16": "1", "17": "w", "18": "1", "19": "ป", "20": "ป", "21": "ป", "22": "1", "23": "ก", "24": "w", "25": "1"}}, {"code": "DK-213", "name": "นางสาวรุ่งกานต์ เมฆกมล", "nick": "นุ๊ก", "pos": "สินค้าตีกลับ", "cells": {"1": "1", "2": "1", "3": "1", "4": "1", "5": "w", "6": "1", "7": "1", "8": "1", "9": "1", "10": "1", "11": "1", "12": "w", "13": "1", "14": "1", "15": "1", "16": "1", "17": "1", "18": "1", "19": "w", "20": "1", "21": "1", "22": "1", "23": "1", "24": "1", "25": "1"}}, {"code": "DK-229", "name": "นาย เกล็ดแก้ว จันทร์ประสาท", "nick": "ปิก", "pos": "ส่งออก", "cells": {"1": "1", "2": "1", "3": "1", "4": "1", "5": "1", "6": "w", "7": "1", "8": "1", "9": "1", "10": "1", "11": "1", "12": "1", "13": "w", "14": "1", "15": "1", "16": "ป", "17": "1", "18": "1", "19": "1", "20": "w", "21": "1", "22": "1", "23": "1", "24": "1", "25": "1"}}, {"code": "DK-237", "name": "นายณพวิทย์ จิตรผ่อง", "nick": "เต้", "pos": "คัดแยกพัสดุ", "cells": {"1": "1", "2": "1", "3": "1", "4": "1", "5": "w", "6": "1", "7": "1", "8": "1", "9": "ส", "10": "1", "11": "1", "12": "w", "13": "1", "14": "1", "15": "1", "16": "1", "17": "ป", "18": "1", "19": "w", "20": "1", "21": "1", "22": "1", "23": "1", "24": "ส", "25": "1"}}, {"code": "DK-238", "name": "นายอิทธิพันธ์  ฮวดเชี่ยวชาญ", "nick": "ปิก", "pos": "คัดแยกพัสดุ", "cells": {"1": "1", "2": "ป", "3": "1", "4": "w", "5": "1", "6": "1", "7": "1", "8": "1", "9": "1", "10": "ป", "11": "w", "12": "1", "13": "1", "14": "1", "15": "1", "16": "1", "17": "1", "18": "w", "19": "1", "20": "1", "21": "1", "22": "1", "23": "1", "24": "1", "25": "w"}}, {"code": "DK-239", "name": "นายธนพล ประเสริฐศรี", "nick": "เบียร์", "pos": "พนักงานยกของ (ส่งออก)", "cells": {"1": "1", "2": "w", "3": "1", "4": "1", "5": "1", "6": "1", "7": "1", "8": "1", "9": "1", "10": "1", "11": "1", "12": "w", "13": "1", "14": "1", "15": "1", "16": "w", "17": "ป", "18": "1", "19": "1", "20": "1", "21": "1", "22": "1", "23": "w", "24": "1", "25": "1"}}, {"code": "DK-240", "name": "นางสาวอภิสรา อร่ามรามศรี", "nick": "เหมย", "pos": "ส่งออก", "cells": {"1": "1", "2": "1", "3": "1", "4": "w", "5": "1", "6": "1", "7": "1", "8": "1", "9": "1", "10": "1", "11": "w", "12": "1", "13": "1", "14": "1", "15": "1", "16": "1", "17": "1", "18": "w", "19": "1", "20": "1", "21": "1", "22": "1", "23": "1", "24": "1", "25": "w"}}]}</script>
+</section>
+<section id="view-dash" class="view">
+
+<div class="dbbar">
+  <div class="dbbar-in">
+    <span class="dblab">ฐานข้อมูล</span>
+    <input class="url" id="dbUrl" placeholder="Supabase URL (https://xxx.supabase.co)">
+    <input class="key" id="dbKey" type="password" placeholder="anon key">
+    <button class="dbbtn go" id="dbConnect">เชื่อมต่อ</button>
+    <input class="mon" id="dbMonth" type="month">
+    <button class="dbbtn load" id="dbLoad">โหลดจาก DB</button>
+    <button class="dbbtn" id="dbImport">นำเข้าข้อมูลปัจจุบันขึ้น DB</button>
+    <span class="demo-tag on" id="demoTag">ข้อมูลตัวอย่าง</span>
+    <div class="select-wrap"><select id="sheetSel"><option>Daiki July 2026</option></select></div>
+    <label class="btn btn-upload" for="fileIn">อัปโหลดไฟล์ Excel</label>
+    <input type="file" id="fileIn" accept=".xlsx,.xls">
+    <span class="dbmsg" id="dbMsg">ยังไม่ได้เชื่อมต่อ — กรอก URL + anon key แล้วกด "เชื่อมต่อ"</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="kpis" id="kpis"></div>
+
+  <div class="panel" id="dailyPanel">
+    <div class="section-h"><span class="eyebrow">รายวัน</span><h2>จำนวนคนมาทำงานแต่ละวัน</h2><span class="sub" id="dailySub"></span></div>
+    <div class="steps" id="steps"></div>
+    <div class="day-detail" id="dayDetail"></div>
+  </div>
+
+  <div class="section-h"><span class="eyebrow">รายบุคคล</span><h2>สถิติสะสมรายบุคคล</h2><span class="sub" id="tblSub"></span></div>
+  <div class="controls">
+    <div class="field grow">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <input id="q" placeholder="ค้นหาชื่อ หรือชื่อเล่น...">
+    </div>
+    <div class="field"><select id="dept"></select></div>
+    <div class="field"><select id="sort">
+      <option value="idx">เรียงตามลำดับ</option>
+      <option value="name">เรียงตามชื่อ</option>
+      <option value="absent">ขาดงานมากสุด</option>
+      <option value="late">มาสายมากสุด</option>
+      <option value="leave">ลารวมมากสุด</option>
+      <option value="rate">อัตราการมาน้อยสุด</option>
+    </select></div>
+    <button class="btn exp" id="exportBtn">Export Excel</button>
+  </div>
+
+  <div class="tbl-wrap" id="tblWrap"></div>
+
+
+  <div class="legend" id="legend"></div>
+  <div class="foot" id="foot"></div>
+</div>
+
+<script id="demoData" type="application/json">{"sheet": "Daiki July 2026", "asOf": "2026-07-25", "days": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31], "employees": [{"name": "นายสิทธิ์ เทพศิริ", "nick": "สี", "pos": "พนักงานทั่วไป", "start": "2017-09-05", "tenure": "8ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "", "", "", "", "", ""]}, {"name": "นายชนกรรณภ์ กลิ่นประยูร", "nick": "ต้น", "pos": "พนักงานขับรถ", "start": "2025-07-05", "tenure": "0ปี", "cells": ["1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "", "", "", "", "", ""]}, {"name": "นางสาวณัฐกานต์  ปิ่นเกล้า", "nick": "ส้ม", "pos": "สินค้าตีกลับ", "start": "2025-07-29", "tenure": "125ปี", "cells": ["1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "ป", "ป", "1", "w", "", "", "", "", "", ""]}, {"name": "นางสาวนิติกาญจน์ แก้วเกล็ด", "nick": "ตาล", "pos": "สินค้าตีกลับ", "start": "2025-08-06", "tenure": "125ปี", "cells": ["1", "1", "w", "ก", "ป", "1", "1", "1", "1", "w", "1", "ป", "1", "1", "1", "1", "w", "1", "ป", "ป", "ป", "1", "ก", "w", "1", "", "", "", "", "", ""]}, {"name": "นางสาวรุ่งกานต์ เมฆกมล", "nick": "นุ๊ก", "pos": "สินค้าตีกลับ", "start": "2025-08-29", "tenure": "125ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "", "", "", "", "", ""]}, {"name": "นาย เกล็ดแก้ว จันทร์ประสาท", "nick": "ปิก", "pos": "ส่งออก", "start": "2025-11-24", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "ป", "1", "1", "1", "w", "1", "1", "1", "1", "1", "", "", "", "", "", ""]}, {"name": "นายณพวิทย์ จิตรผ่อง", "nick": "เต้", "pos": "คัดแยกพัสดุ", "start": "2026-02-24", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "ส", "1", "1", "w", "1", "1", "1", "1", "ป", "1", "w", "1", "1", "1", "1", "ส", "1", "", "", "", "", "", ""]}, {"name": "นายอิทธิพันธ์  ฮวดเชี่ยวชาญ", "nick": "ปิก", "pos": "คัดแยกพัสดุ", "start": "2026-03-09", "tenure": "0ปี", "cells": ["1", "ป", "1", "w", "1", "1", "1", "1", "1", "ป", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "", "", "", "", "", ""]}, {"name": "นายธนพล ประเสริฐศรี", "nick": "เบียร์", "pos": "พนักงานยกของ (ส่งออก)", "start": "2026-03-10", "tenure": "0ปี", "cells": ["1", "w", "1", "1", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "w", "ป", "1", "1", "1", "1", "1", "w", "1", "1", "", "", "", "", "", ""]}, {"name": "นางสาวอภิสรา อร่ามรามศรี", "nick": "เหมย", "pos": "ส่งออก", "start": "2026-03-16", "tenure": "0ปี", "cells": ["1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "", "", "", "", "", ""]}, {"name": "นางกัญนิตา เอกรัตนณัฐ", "nick": "บี", "pos": "ส่งออก", "start": "2026-03-18", "tenure": "0ปี", "cells": ["1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "", "", "", "", "", ""]}, {"name": "ว่าที่ร้อยตรีหญิง พิมพ์นภา สร้อยทองมูล", "nick": "แตงกวา", "pos": "ผช.หัวหน้า", "start": "2026-04-01", "tenure": "0ปี", "cells": ["1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "", "", "", "", "", ""]}, {"name": "นายศักดิ์มงคล บัวมณี", "nick": "แป๊ป", "pos": "พนักงานขับรถ", "start": "2026-05-24", "tenure": "0ปี", "cells": ["w", "1", "1", "ข", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "นายกฤติพจน์ บุตรบำรุง", "nick": "ตอง", "pos": "พนักงานขับรถ", "start": "2026-06-01", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "ข", "ข", "w", "1", "1", "1", "1", "1", "1", "1", "1", "ส", "w", "ส", "ส", "1", "", "", "", "", "", ""]}, {"name": "นายสรวิศ เอื้อราษฎ์", "nick": "เต๋า", "pos": "ส่งออก", "start": "2569-06-10", "tenure": "0ปี", "cells": ["w", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "", "", "", "", "", ""]}, {"name": "นางสาวสุนิสา สมพรมทิพย์", "nick": "สุ", "pos": "ส่งออก", "start": "2569-06-22", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "ส", "1", "", "", "", "", "", ""]}, {"name": "นางสาวพัชรี ณะจินดา", "nick": "บุ๋ม", "pos": "ส่งออก", "start": "2569-06-22", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "ส", "", "", "", "", "", ""]}, {"name": "นายเอกพล คุ้มแก้ว", "nick": "หนุ่ม", "pos": "ส่งออก", "start": "2569-06-22", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "", "", "", "", "", ""]}, {"name": "นายพนา ยิ้มกุ้ย", "nick": "ก้อง", "pos": "คัดแยก(คลังใหม่)", "start": "2026-04-01", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "", "", "", "", "", ""]}, {"name": "นางสาวเหมือนขวัญ ทองวัน", "nick": "หลิว", "pos": "ย่อยกระดาษ", "start": "2026-04-21", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "w", "1", "1", "1", "1", "ก", "1", "", "", "", "", "", ""]}, {"name": "นายธนวัฒน์ คมขำ", "nick": "เอฟ", "pos": "ย่อยกระดาษ", "start": "2026-05-23", "tenure": "0ปี", "cells": ["ป", "ก", "ก", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "", "", "", "", "", ""]}, {"name": "นางสาวโชติกา ดอนคำพา", "nick": "ปาล์ม", "pos": "ย่อยกระดาษ", "start": "2026-05-30", "tenure": "0ปี", "cells": ["1", "1", "ป", "1", "w", "1", "1", "1", "1", "ก", "1", "w", "1", "1", "1", "ก", "w", "1", "1", "1", "ส", "1", "1", "ก", "w", "", "", "", "", "", ""]}, {"name": "นางสาววิภานนท์ คมใย", "nick": "ปอนด์", "pos": "ย่อยกระดาษ", "start": "2026-05-30", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "w", "1", "1", "1", "1", "1", "1", "1", "1", "w", "", "", "", "", "", ""]}, {"name": "นายภัทพล โชติกโสภณ", "nick": "ปอ", "pos": "ช่างเคลมสินค้า", "start": "2026-06-01", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "ป", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "", "", "", "", "", ""]}, {"name": "นาย รัฐสิทธิ์ หว่านพืช", "nick": "อาร์ม", "pos": "ย่อยกระดาษ", "start": "2026-07-16", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1", "1", "1", "1", "1", "1", "1", "1", "w", "1", "", "", "", "", "", ""]}, {"name": "นางสาวสุภาพร จันทร์ทุ่งใหญ่", "nick": "ตุ๊ก", "pos": "ย่อยกระดาษ", "start": "2026-07-20", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1", "1", "1", "1", "1", "1", "", "", "", "", "", ""]}, {"name": "นายสราวุฒิ เส็งโคกหวาย", "nick": "ยูโร", "pos": "ช่างเคลมสินค้า", "start": "2026-07-20", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1", "1", "1", "1", "1", "1", "", "", "", "", "", ""]}, {"name": "นาย เอกพันธ์ สุทธิสิริวรรณ", "nick": "ตี๋", "pos": "ช่างเคลมสินค้า", "start": "2026-07-20", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1", "1", "1", "1", "1", "1", "", "", "", "", "", ""]}, {"name": "นางสาววิรัญชนา คำเงิน", "nick": "อ้อม", "pos": "จัดส่ง-ตีกลับ", "start": "2021-03-29", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "", "", "", "", "", ""]}, {"name": "นางสาวสุนิตา บุมี", "nick": "มุก", "pos": "จัดส่ง-ตีกลับ", "start": "2021-03-29", "tenure": "0ปี", "cells": ["1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "", "", "", "", "", ""]}, {"name": "นางสาวอมราวดี โต๊ะลี", "nick": "น้อง", "pos": "แพ็คสินค้า", "start": "2025-10-30", "tenure": "0ปี", "cells": ["w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "", "", "", "", "", ""]}, {"name": "นางสาววัชนีภรณ์  กงจี่", "nick": "จูน", "pos": "แพ็คสินค้า", "start": "2025-10-30", "tenure": "0ปี", "cells": ["1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "", "", "", "", "", ""]}, {"name": "นางสาวอริษา เหมือนคง", "nick": "พราว", "pos": "แพ็คสินค้า", "start": "2025-11-10", "tenure": "0ปี", "cells": ["1", "1", "w", "ก", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "", "", "", "", "", ""]}, {"name": "นางสาววิภารัตน์ ศรีคำนพ", "nick": "หว้า", "pos": "แพ็คสินค้า", "start": "2025-12-09", "tenure": "0ปี", "cells": ["ก", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "", "", "", "", "", ""]}, {"name": "นายวชากร จิราภัคหิรัญ", "nick": "ยีน", "pos": "แพ็คสินค้า", "start": "2026-06-16", "tenure": "0ปี", "cells": ["1", "1", "ป", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "ป", "1", "1", "ป", "1", "1", "w", "1", "1", "1", "1", "1", "", "", "", "", "", ""]}, {"name": "นางสาวฉัตรนภา สุขประพันธ์", "nick": "บิว", "pos": "แพ็คสินค้า", "start": "2026-07-20", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1", "1", "1", "1", "1", "1", "", "", "", "", "", ""]}, {"name": "นางสาวดวงสุรีย์ ทางาม", "nick": "ปุ๊ก", "pos": "แพ็คสินค้า", "start": "2026-07-20", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1", "1", "1", "1", "1", "1", "", "", "", "", "", ""]}, {"name": "นางสาวนงนุช เห็มลา", "nick": "นุช", "pos": "แพ็คสินค้า", "start": "2026-07-20", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1", "1", "1", "1", "1", "1", "", "", "", "", "", ""]}, {"name": "นายนพนันท์ ไผ่ล้อม", "nick": "พี", "pos": "แพ็คสินค้า", "start": "2026-07-20", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1", "1", "1", "1", "1", "1", "", "", "", "", "", ""]}, {"name": "นาย ณัฐวุฒิ อวยชัย", "nick": "แบงค์", "pos": "จนท.คลัง", "start": "2025-07-16", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นาย สกล ใช้ปัญญา", "nick": "ป้อม", "pos": "หัวหน้ารับเข้า", "start": "2022-02-28", "tenure": "0ปี", "cells": ["1", "1", "h", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นาย ศุภกร ปานเจริญ", "nick": "แจ๊ค", "pos": "หัวหน้าแพ็ค", "start": "2022-02-08", "tenure": "0ปี", "cells": ["w", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "1", "1", "1", "w", "พ", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นาย อนันต์ เกิดเจริญ", "nick": "ต๊อด", "pos": "หัวหน้าขนส่ง", "start": "2022-06-04", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "พ", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นาย ภาณุพงศ์ รื่นรวย", "nick": "แบงค์", "pos": "พนักงานขับรถ", "start": "2025-08-27", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นางสาวภัสรินทร์ สดใส", "nick": "มิ้นท์", "pos": "ผู้ช่วยหัวหน้าคลัง", "start": "2026-03-26", "tenure": "0ปี", "cells": ["1", "w", "1", "1", "1", "1", "1", "1", "1", "1", "w", "ป", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "", "", "", "", "", "", ""]}, {"name": "นายธนาชัย จำปาศรี", "nick": "เอ", "pos": "หัวหน้าคลัง", "start": "2026-06-23", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "", "", "", "", "", "", ""]}, {"name": "นางสาวผาณิตา ทองไตรวิชสุทธิ", "nick": "ปอน", "pos": "แพ็คสินค้า", "start": "2025-10-18", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "w", "1", "1", "ป", "1", "1", "1", "w", "1", "1", "ป", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นายกฤษฎิ์ พินิจการ", "nick": "นัท", "pos": "จนท.คลัง", "start": "2026-05-15", "tenure": "0ปี", "cells": ["ป", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นายชาญชัย เรื่องวอน", "nick": "ชาญ", "pos": "แพ็คสินค้า", "start": "2026-05-17", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "ก", "1", "1", "1", "1", "w", "ก", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นายวัชรพงษ์  พาบุตร", "nick": "ก้อง", "pos": "แพ็คสินค้า", "start": "2026-05-19", "tenure": "0ปี", "cells": ["1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "ก", "1", "1", "1", "1", "1", "ข", "w", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นางสาวพรทิพย์ ศิรินัย", "nick": "กล้วย", "pos": "แพ็คสินค้า", "start": "2026-05-19", "tenure": "0ปี", "cells": ["1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "ก", "1", "1", "1", "1", "1", "ข", "w", "1", "1", "ป", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นางสาวชวนพิศ  ชูราศรี", "nick": "ต่าย", "pos": "แพ็คสินค้า", "start": "2026-05-21", "tenure": "0ปี", "cells": ["1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นางสาวปิยรัตน์  อินาลา", "nick": "พลอย", "pos": "แพ็คสินค้า", "start": "2026-05-22", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นางสาวจุฑามาศ เกษร์บัว", "nick": "อุ้ม", "pos": "แพ็คสินค้า", "start": "25/5/0206", "tenure": "0ปี", "cells": ["1", "ป", "1", "1", "1", "ป", "1", "1", "1", "ป", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นายสันติ  ผาคุณ", "nick": "เรย์", "pos": "แพ็คสินค้า", "start": "2026-05-25", "tenure": "0ปี", "cells": ["1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นางสาวสุธิตา  สุดเฉลียว", "nick": "ทราย", "pos": "แพ็คสินค้า", "start": "2026-05-26", "tenure": "0ปี", "cells": ["1", "1", "w", "w", "1", "1", "1", "1", "1", "ป", "w", "1", "1", "ป", "ป", "ป", "ป", "w", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นายพงษ์พัฒน์ บุญวิเศษ", "nick": "ป๋อ", "pos": "แพ็คสินค้า", "start": "2026-06-01", "tenure": "0ปี", "cells": ["ป", "1", "ป", "1", "w", "1", "1", "1", "1", "1", "ข", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นายฐิติกร ทองมุ้ย", "nick": "กล้า", "pos": "แพ็คสินค้า", "start": "2026-06-02", "tenure": "0ปี", "cells": ["1", "1", "1", "ป", "w", "ก", "1", "ป", "1", "1", "ข", "1", "1", "1", "1", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "นางสาววิรินทร์ ทรัพย์ผาติสุข", "nick": "เจน", "pos": "แพ็คสินค้า", "start": "2026-06-03", "tenure": "0ปี", "cells": ["ป", "1", "ป", "1", "ป", "1", "1", "1", "ป", "1", "1", "w", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "นางสาวเจนจิรา อิ่มลิ้มทาน", "nick": "เจน", "pos": "แพ็คสินค้า", "start": "2026-06-03", "tenure": "0ปี", "cells": ["1", "ข", "ข", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "นางสาวสุดารัตน์ ไสสุด", "nick": "แคท", "pos": "แพ็คสินค้า", "start": "2026-06-03", "tenure": "0ปี", "cells": ["ป", "1", "1", "1", "ข", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "w", "1", "1", "ข", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นายอมลธนัต สุขสมัคร", "nick": "แบงค์", "pos": "แพ็คสินค้า", "start": "2026-06-04", "tenure": "0ปี", "cells": ["1", "ก", "1", "1", "ข", "1", "ข", "1", "1", "1", "ก", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "นางสาวพิชามณญ์ บุญถึง", "nick": "ใหม่", "pos": "แพ็คสินค้า", "start": "2026-06-04", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "ป", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นายธรรมวิทย์  ล้อมเศรษฐี", "nick": "ตุ๊ก", "pos": "แพ็คสินค้า", "start": "2026-06-04", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นายสตางค์ หอมมาก", "nick": "ตัง", "pos": "แพ็คสินค้า", "start": "2026-06-10", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "ข", "1", "1", "1", "1", "w", "1", "1", "ข", "1", "1", "1", "w", "ข", "ข", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "นายสมเกียรติ แซ่จิว", "nick": "เกียรติ", "pos": "แพ็คสินค้า", "start": "2026-06-10", "tenure": "0ปี", "cells": ["1", "1", "w", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "นางสาวมยุรี บุตรดี", "nick": "เผือก", "pos": "แพ็คสินค้า", "start": "2026-06-11", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "ป", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "ป", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นายศิวัจน์ ยิ่งสิทธิ์วัฒนา", "nick": "ฟลุ็ค", "pos": "แพ็คสินค้า", "start": "2026-06-11", "tenure": "0ปี", "cells": ["ก", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "ป", "1", "1", "1", "1", "ก", "ก", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นายธิติพันธ์  โพธิ์พันธ์ุศรี", "nick": "เอ็กซ์", "pos": "แพ็คสินค้า", "start": "2026-06-12", "tenure": "0ปี", "cells": ["1", "1", "1", "w", "ป", "1", "1", "1", "1", "1", "w", "1", "ก", "1", "1", "1", "1", "w", "ป", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นายพงศ์พัฒน์ ภิรมย์น้อย", "nick": "เบิร์ด", "pos": "แพ็คสินค้า", "start": "2026-06-13", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นางสาวภิรมย์พร  เพ็ชรไทย", "nick": "ฟิล์ม", "pos": "แพ็คสินค้า", "start": "2026-06-16", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "ป", "ก", "1", "1", "1", "1", "ข", "ข", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "นางสาวดาหวัน จันทะกล", "nick": "น้ำหวาน", "pos": "แพ็คสินค้า", "start": "2026-06-16", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "ก", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นายนพพล  อัครเอกชัย", "nick": "เบียร์", "pos": "แพ็คสินค้า", "start": "2026-06-16", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "ป", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "ก", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นางสาวฟ้าใส ทิวรักษา", "nick": "กั้ง", "pos": "แพ็คสินค้า", "start": "2026-06-20", "tenure": "0ปี", "cells": ["ป", "1", "1", "ก", "ก", "1", "1", "ก", "1", "1", "w", "1", "1", "1", "ป", "ป", "w", "ป", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นางสาวเรื่องรดา พินกฤษ", "nick": "กิ๊บ", "pos": "แพ็คสินค้า", "start": "2026-06-20", "tenure": "0ปี", "cells": ["ป", "1", "1", "ก", "ก", "1", "1", "ก", "ข", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "นางสาวขันทอง เตียวฮวด", "nick": "ปลา", "pos": "แพ็คสินค้า", "start": "2026-06-20", "tenure": "0ปี", "cells": ["1", "1", "w", "1", "1", "ก", "1", "1", "ข", "1", "1", "ป", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "นายเมย์ บุญจรัส", "nick": "แบงค์", "pos": "แพ็คสินค้า", "start": "2026-06-22", "tenure": "0ปี", "cells": ["ข", "ข", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "นายชนะชล บุญถึง", "nick": "คิว", "pos": "แพ็คสินค้า", "start": "2026-06-22", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นายกิตติชัย สาละสาลิน", "nick": "แกรม", "pos": "แพ็คสินค้า", "start": "2026-06-23", "tenure": "0ปี", "cells": ["ข", "1", "1", "1", "1", "1", "1", "1", "1", "w", "1", "w", "1", "1", "1", "ข", "1", "1", "1", "1", "ข", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นางสาวศศิการณ์ ชัยหาญ", "nick": "นิ่ม", "pos": "แพ็คสินค้า", "start": "2026-06-24", "tenure": "0ปี", "cells": ["1", "ข", "1", "ป", "w", "1", "1", "1", "1", "1", "w", "1", "ก", "1", "1", "1", "1", "w", "1", "ป", "1", "1", "1", "ข", "", "", "", "", "", "", ""]}, {"name": "นางสาวชุติมา จันทร์ขำ", "nick": "อุ้ม", "pos": "แพ็คสินค้า", "start": "2026-06-25", "tenure": "0ปี", "cells": ["ก", "ข", "1", "1", "w", "ป", "ป", "ป", "1", "1", "w", "1", "1", "ป", "1", "ก", "ก", "ก", "w", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "นางสาวปาณิศา  เลิศศักดิ์ชัย", "nick": "แตงกวา", "pos": "แพ็คสินค้า", "start": "2026-06-25", "tenure": "0ปี", "cells": ["1", "1", "1", "w", "1", "1", "1", "1", "1", "w", "ป", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นางสาวนิริศรา  ประกอบทรัพย์", "nick": "มิ้น", "pos": "แพ็คสินค้า", "start": "2026-06-25", "tenure": "0ปี", "cells": ["1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "ป", "1", "1", "w", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นายพรรษกร บำรุงเขต", "nick": "พัด", "pos": "แพ็คสินค้า", "start": "2026-07-01", "tenure": "0ปี", "cells": ["1", "1", "1", "ก", "ก", "1", "1", "ก", "1", "1", "w", "1", "1", "1", "1", "ก", "1", "1", "w", "ข", "ข", "1", "ข", "", "", "", "", "", "", "", ""]}, {"name": "นายณัฐพงษ์ มณีกัญญ์", "nick": "ณัฐ", "pos": "แพ็คสินค้า", "start": "2026-07-01", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "ก", "1", "1", "1", "1", "1", "1", "w", "", "", "", "", "", "", ""]}, {"name": "นางสาวเสาวนิตย์ จันทะกล", "nick": "ยีน", "pos": "แพ็คสินค้า", "start": "2026-07-01", "tenure": "0ปี", "cells": ["1", "ป", "ก", "1", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "นางสาวปราถนา สมยศ", "nick": "โอเล่", "pos": "แพ็คสินค้า", "start": "2026-07-01", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "ก", "1", "1", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นายสิทธิ์ิชัย บัวงามดี", "nick": "เป้", "pos": "แพ็คสินค้า", "start": "2026-07-01", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "ก", "1", "1", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นายเทอดพงศ์ จงสอน", "nick": "ต๋อง", "pos": "แพ็คสินค้า", "start": "2026-07-06", "tenure": "0ปี", "cells": ["", "", "", "", "", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นางสาวเสาวลักษณ์ แจ่มศรี", "nick": "เจล", "pos": "แพ็คสินค้า", "start": "2026-07-06", "tenure": "0ปี", "cells": ["", "", "", "", "", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นายณภัทร ขันอำนาจ", "nick": "แพ็ค", "pos": "แพ็คสินค้า", "start": "2026-07-06", "tenure": "0ปี", "cells": ["", "", "", "", "", "1", "1", "ข", "ข", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "นายเจษฎากร พ่วงจั่น", "nick": "เบส", "pos": "แพ็คสินค้า", "start": "2026-07-07", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "1", "1", "1", "1", "w", "1", "1", "1", "ป", "ป", "1", "1", "w", "ข", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "นายภานุพงศ์ ผลกาบ", "nick": "เต้ย", "pos": "แพ็คสินค้า", "start": "2026-07-07", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "1", "1", "ก", "1", "1", "ก", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "นางสาวจารุณี ตะโกเนียม", "nick": "เฟิร์น", "pos": "แพ็คสินค้า", "start": "2026-07-07", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "1", "1", "1", "1", "1", "ข", "1", "ป", "ข", "ข", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "นางสาวจิราภรณ์ สิงห์ที", "nick": "ยุ้ย", "pos": "แพ็คสินค้า", "start": "2026-07-10", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "", "", "1", "1", "ข", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "นายนันทวัฒน์ ชื่นชม", "nick": "อาร์ต", "pos": "แพ็คสินค้า", "start": "2026-07-10", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "", "", "ข", "ข", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "นางสาวสุภาภรณ์ ดกตุสุขำ", "nick": "ต้อม", "pos": "แพ็คสินค้า", "start": "2026-07-10", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "", "", "ข", "ข", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "นางสาวพีรนันท์ แก้วมหา", "nick": "พี", "pos": "แพ็คสินค้า", "start": "2026-07-16", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1", "1", "1", "1", "1", "1", "1", "1", "ป", "", "", "", "", "", "", ""]}, {"name": "นางสาวนภาพร ยารังษี", "nick": "หญิง", "pos": "แพ็คสินค้า", "start": "2026-07-16", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1", "1", "1", "1", "1", "1", "1", "ป", "1", "", "", "", "", "", "", ""]}, {"name": "นายปิยวัฒน์ มีศิลป์", "nick": "เติ้ล", "pos": "แพ็คสินค้า", "start": "2026-07-16", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "ข", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "นางสาวจันทิมา รักเพลงดี", "nick": "มิ้นท์", "pos": "", "start": null, "tenure": null, "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1", "ข", "", "", "", "", "", "", ""]}, {"name": "นางสาวเรื่องรดา พินกฤษ", "nick": "กิ๊๊บ", "pos": "", "start": null, "tenure": null, "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1", "", "", "", "", "", "", ""]}, {"name": "MR. KYAW THU PAING", "nick": "โจตูไป", "pos": "แพ็คสินค้า", "start": null, "tenure": "0ปี", "cells": ["1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "", "", "", "", "", "", ""]}, {"name": "MR. PYAE PHYO AUNG", "nick": "พิว", "pos": "แพ็คสินค้า", "start": null, "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "MRS. NGU WAR", "nick": "นุ", "pos": "แพ็คสินค้า", "start": null, "tenure": "0ปี", "cells": ["1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "", "", "", "", "", "", ""]}, {"name": "MISS WIN THTAY", "nick": null, "pos": "", "start": null, "tenure": null, "cells": ["ข", "ข", "1", "1", "1", "1", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "MR. ZAW MYO HTWE", "nick": null, "pos": "แพ็คสินค้า", "start": null, "tenure": "0ปี", "cells": ["1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "ป", "1", "1", "", "", "", "", "", "", ""]}, {"name": "MISS EI EI PHYO", "nick": null, "pos": "แพ็คสินค้า", "start": null, "tenure": "0ปี", "cells": ["1", "1", "w", "1", "1", "1", "1", "1", "ก", "w", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "ป", "1", "1", "", "", "", "", "", "", ""]}, {"name": "MR.PHOE CHIT", "nick": null, "pos": "แพ็คสินค้า", "start": null, "tenure": "0ปี", "cells": ["1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "MISS NAN THEIN THEIN AYE", "nick": null, "pos": "แพ็คสินค้า", "start": null, "tenure": "0ปี", "cells": ["1", "1", "1", "w", "ป", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "ข", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "MR. KO KO", "nick": null, "pos": "แพ็คสินค้า", "start": "2025-12-10", "tenure": "0ปี", "cells": ["1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "ป", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "", "", "", "", "", "", ""]}, {"name": "MYO THANDAR SAN", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-02-19", "tenure": "0ปี", "cells": ["1", "1", "ป", "1", "1", "1", "1", "1", "ป", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "", "", "", "", "", "", ""]}, {"name": "ZAR NI ZAW", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-02-19", "tenure": "0ปี", "cells": ["1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "MR.PAINE PAINE", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-03-04", "tenure": "0ปี", "cells": ["1", "1", "w", "1", "1", "ก", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "ข", "1", "1", "ก", "", "", "", "", "", "", ""]}, {"name": "NAN MOE", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-02-19", "tenure": "0ปี", "cells": ["1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "ป", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "", "", "", "", "", "", ""]}, {"name": "MIN CHIT THU", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-02-19", "tenure": "0ปี", "cells": ["1", "1", "w", "1", "1", "ข", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "ข", "1", "1", "1", "1", "1", "1", "w", "", "", "", "", "", "", ""]}, {"name": "MR.KYAW KYAW HTIKE", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-02-19", "tenure": "0ปี", "cells": ["1", "1", "ป", "1", "1", "ป", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "", "", "", "", "", "", ""]}, {"name": "MR. PYAE PYAE AUNG", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-03-21", "tenure": "0ปี", "cells": ["1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "", "", "", "", "", "", ""]}, {"name": "MISS.THU ZAR KHAING", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-03-21", "tenure": "0ปี", "cells": ["1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "", "", "", "", "", "", ""]}, {"name": "MISS.HTOO HTOO AUNG", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-03-21", "tenure": "0ปี", "cells": ["1", "1", "w", "ป", "1", "1", "ก", "ก", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "MISS.ZIN MAW LIN", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-04-22", "tenure": "0ปี", "cells": ["1", "1", "w", "1", "ป", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "", "", "", "", "", "", ""]}, {"name": "MISS.PAYE PHYO KHAING", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-04-22", "tenure": "0ปี", "cells": ["1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "MR. SOE PYAE AUNG", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-06-02", "tenure": "0ปี", "cells": ["ข", "ข", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "MISS.KUN WUT", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-06-02", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "MR.AYE MIN SOE", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-06-16", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "MR.MON", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-06-19", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "MR. YE KO WIN", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-07-01", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "1", "1", "ข", "1", "1", "1", "1", "1", "1", "1", "1", "ข", "w", "1", "1", "1", "1", "1", "1", "w", "", "", "", "", "", "", ""]}, {"name": "MR. MAUNG WEL", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-07-01", "tenure": "0ปี", "cells": ["1", "1", "w", "1", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "MR. TOE NAING", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-07-01", "tenure": "0ปี", "cells": ["1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "MISS.AYE THIDAR PHYO", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-07-05", "tenure": "0ปี", "cells": ["", "", "", "", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "ข", "ป", "w", "ข", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "MR.KAUNG HTET THU", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-07-05", "tenure": "0ปี", "cells": ["", "", "", "", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "ข", "1", "w", "ข", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "MR.KHIN WIN MAUNG", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-07-08", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "1", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "MR.MIN KHANT KYAW", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-07-08", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "ข", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "MR.THANT ZAN AUNG", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-07-08", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "1", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "MR.THU YA OO", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-07-08", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "MR.AUNG KYAW ZAW", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-07-13", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "MR.KYAW THET", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-07-13", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "1", "1", "1", "1", "1", "1", "w", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "MISS.TAENG MO", "nick": null, "pos": "แพ็คสินค้า", "start": "2026-07-16", "tenure": "0ปี", "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1", "1", "1", "1", "1", "1", "1", "ก", "1", "", "", "", "", "", "", ""]}, {"name": "MR.CHIT PAING", "nick": null, "pos": "", "start": null, "tenure": null, "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "MR.KYAW MYO  THU", "nick": null, "pos": "", "start": null, "tenure": null, "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1", "1", "1", "1", "ข", "", "", "", "", "", "", ""]}, {"name": "MR.HEIN MYAT THU", "nick": null, "pos": "", "start": null, "tenure": null, "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1", "1", "1", "1", "ข", "", "", "", "", "", "", ""]}, {"name": "MISS.HNIN WAI PHYO", "nick": null, "pos": "", "start": null, "tenure": null, "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1", "1", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "MISS.YEE WIN", "nick": null, "pos": "", "start": null, "tenure": null, "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1", "1", "1", "", "", "", "", "", "", ""]}, {"name": "MR.MYINT SOE", "nick": null, "pos": "", "start": null, "tenure": null, "cells": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "1", "1", "1", "", "", "", "", "", "", ""]}]}</script>
+</section>
+<section id="view-leave" class="view">
+
+<div class="wrap">
+  <div class="section-h"><span class="eyebrow">สิทธิการลา</span><h2>สิทธิการลาคงเหลือรายปี</h2><span class="sub" id="quotaSub"></span></div>
+  <div class="controls">
+    <div class="field"><span style="color:var(--muted);font-size:12.5px">ปี พ.ศ.</span><select id="quotaYear"></select></div>
+    <button class="btn" id="quotaLoadDB" style="background:#2E9E6B;border-color:#2E9E6B;color:#fff">โหลดจาก DB</button>
+    <span class="quota-note">โควตา/ปี: <b>ลากิจ 4</b> · <b>ลาป่วย 30</b> · <b>พักร้อน 6</b> (พักร้อน &le; ไตรมาสละ 2) — ในสิทธิ = ได้รับค่าจ้าง</span>
+    <span class="dbmsg" id="leaveMsg" style="margin-left:auto"></span>
+  </div>
+  <div class="tbl-wrap" id="quotaWrap"><div class="empty-state"><h3>ยังไม่ได้โหลดข้อมูล</h3><div>เลือกปีแล้วกด &quot;โหลดจาก DB&quot;</div></div></div>
+</div>
+
+</section>
+<section id="view-employees" class="view">
+
+<div class="wrap">
+  <div class="section-h"><span class="eyebrow">ข้อมูลพนักงาน</span><h2>จัดการฐานข้อมูลพนักงาน</h2><span class="sub" id="empSub"></span></div>
+  <div class="controls">
+    <div class="field grow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="empSearch" placeholder="ค้นหาชื่อ / รหัส / ตำแหน่ง"></div>
+    <div class="field"><select id="empFilter"><option value="active">ทำงานอยู่</option><option value="resigned">ลาออกแล้ว</option><option value="all">ทั้งหมด</option></select></div>
+    <button class="btn" id="empAdd" style="background:var(--orange);border-color:var(--orange);color:var(--ink)">＋ เพิ่มพนักงาน</button>
+    <span class="dbmsg" id="empMsg" style="margin-left:auto"></span>
+  </div>
+  <div id="empForm" class="emp-form" style="display:none"></div>
+  <div class="tbl-wrap" id="empWrap"></div>
+</div>
+
+</section>
+<script>// Supabase client ตัวเดียวใช้ร่วมทั้ง 2 แท็บ
+window.__SB_URL="https://malleyieygvcqfgkzxnf.supabase.co";
+window.__SB_KEY="sb_publishable_Bk-HtUSrZdDXAAefn6R0hw_AxKiV9-g";
+window.__getSB=function(){
+  if(!window.__SB_CLIENT && window.supabase && window.__SB_URL && !/PASTE-PROJECT-URL/.test(window.__SB_URL)){
+    window.__SB_CLIENT=window.supabase.createClient(window.__SB_URL,window.__SB_KEY);
+  }
+  return window.__SB_CLIENT||null;
+};</script>
+<script>
+(function(){
+var ROOT=document.getElementById('view-dash');var $=function(id){return ROOT.querySelector('#'+id);};
+
+"use strict";
+
+// รหัสในช่องรายวัน -> หมวด
+var STATUS = [
+  {key:"present",  label:"มาทำงาน",  short:"มา",   color:"var(--present)",  codes:["1","1.0"]},
+  {key:"late",     label:"มาสาย",    short:"สาย",  color:"var(--late)",     codes:["ส"]},
+  {key:"sick",     label:"ลาป่วย",   short:"ป่วย", color:"var(--sick)",     codes:["ป"]},
+  {key:"personal", label:"ลากิจ",    short:"กิจ",  color:"var(--personal)", codes:["ก"]},
+  {key:"vacation", label:"พักร้อน",  short:"พร",   color:"var(--vacation)",codes:["พ"]},
+  {key:"absent",   label:"ขาดงาน",   short:"ขาด",  color:"var(--absent)",   codes:["ข"]},
+  {key:"dayoff",   label:"หยุดประจำ",short:"หยุด", color:"var(--dayoff)",   codes:["w","W"]},
+  {key:"holiday",  label:"วันหยุด",  short:"นข",   color:"var(--holiday)", codes:["h","H"]}
+];
+var CODE2KEY={}, KEYMAP={};
+STATUS.forEach(function(s){ KEYMAP[s.key]=s; s.codes.forEach(function(c){CODE2KEY[c]=s.key;}); });
+function classify(raw){
+  if(raw==null) return "";
+  var s=(""+raw).trim();
+  if(s==="") return "";
+  if(CODE2KEY[s]) return CODE2KEY[s];
+  var f=parseFloat(s);
+  if(!isNaN(f) && Math.abs(f-1)<1e-9) return "present";
+  return "other";
+}
+var MONTH_TH={0:"ม.ค.",1:"ก.พ.",2:"มี.ค.",3:"เม.ย.",4:"พ.ค.",5:"มิ.ย.",6:"ก.ค.",7:"ส.ค.",8:"ก.ย.",9:"ต.ค.",10:"พ.ย.",11:"ธ.ค."};
+var DOW_TH=["อา","จ","อ","พ","พฤ","ศ","ส"];
+
+var DATA=null, sel={day:null, open:null};
+
+function monthMeta(asOf, days){
+  // asOf "YYYY-MM-DD"
+  var y=2026,m=6; // default July(idx6)
+  if(asOf){ var p=asOf.split("-"); y=+p[0]; m=(+p[1])-1; }
+  var asOfDay = asOf? (+asOf.split("-")[2]) : 31;
+  var dows = days.map(function(d){ return new Date(y,m,d).getDay(); });
+  return {y:y,m:m,asOfDay:asOfDay,dows:dows};
+}
+
+// ------- aggregation -------
+function computeEmp(e, days, meta){
+  var c={present:0,late:0,sick:0,personal:0,vacation:0,absent:0,dayoff:0,holiday:0,other:0};
+  var required=0; // วันที่ควรมาทำงาน (ไม่นับหยุดประจำ/วันหยุด/ช่องว่าง)
+  e.cells.forEach(function(raw,i){
+    var k=classify(raw);
+    if(k==="") return;
+    if(c[k]===undefined) c.other++; else c[k]++;
+    if(k==="present"||k==="late"||k==="sick"||k==="personal"||k==="vacation"||k==="absent") required++;
+  });
+  var attended=c.present+c.late;
+  e._c=c; e._req=required; e._att=attended;
+  e._rate = required? Math.round(attended/required*100) : null;
+  e._leave = c.sick+c.personal+c.vacation;
+  return e;
+}
+
+function activeDays(days, emps){
+  // วันที่มีข้อมูลอย่างน้อย 1 คน = วันที่นับไปแล้ว
+  return days.map(function(d,i){
+    var has=false;
+    for(var j=0;j<emps.length;j++){ if((""+ (emps[j].cells[i]||"")).trim()!==""){has=true;break;} }
+    return has;
+  });
+}
+
+function dailyCounts(days, emps, i){
+  var c={present:0,late:0,sick:0,personal:0,vacation:0,absent:0,dayoff:0,holiday:0,other:0};
+  emps.forEach(function(e){ var k=classify(e.cells[i]); if(k==="")return; if(c[k]===undefined)c.other++; else c[k]++; });
+  return c;
+}
+
+// ------- render -------
+function fmt(n){ return (n||0).toLocaleString("en-US"); }
+
+function render(){
+  var d=DATA; var emps=d.employees; var days=d.days; var meta=d.meta;
+  var act=d._active;
+
+  // KPI = สรุป ณ วันล่าสุดที่มีข้อมูล
+  var lastIdx=-1; for(var i=days.length-1;i>=0;i--){ if(act[i]){lastIdx=i;break;} }
+  var today = lastIdx>=0? dailyCounts(days,emps,lastIdx):null;
+  var totalStaff = emps.filter(function(e){ // นับเฉพาะคนที่มีข้อมูลเดือนนี้
+      return e.cells.some(function(x){return (""+ (x||"")).trim()!==""; }); }).length;
+  var sumLeave = today? today.sick+today.personal+today.vacation : 0;
+  var camToday = today? today.present+today.late : 0;
+  var kpiRate = today && (camToday+today.absent+sumLeave)>0
+      ? Math.round(camToday/(camToday+today.absent+sumLeave)*100) : null;
+  var dLabel = lastIdx>=0 ? (days[lastIdx]+" "+MONTH_TH[meta.m]) : "-";
+
+  var kpiEl=document.getElementById("kpis");
+  var K=[
+    {c:"var(--navy)",   lab:"พนักงานทั้งหมด", v:totalStaff, cap:"คนที่มีข้อมูลเดือนนี้"},
+    {c:"var(--present)",lab:"มาทำงานวันนี้", v:camToday, cap:"ล่าสุด "+dLabel},
+    {c:"var(--absent)", lab:"ขาดงานวันนี้",  v:today?today.absent:0, cap:"ล่าสุด "+dLabel},
+    {c:"var(--late)",   lab:"มาสายวันนี้",   v:today?today.late:0,   cap:"ล่าสุด "+dLabel},
+    {c:"var(--sick)",   lab:"ลาวันนี้ (รวม)", v:sumLeave, cap:"ป่วย+กิจ+พักร้อน"},
+    {c:"var(--orange)", lab:"อัตราการมา",    v:(kpiRate==null?"-":kpiRate), suf:(kpiRate==null?"":"%"), cap:"ของวันล่าสุด"}
+  ];
+  kpiEl.innerHTML=K.map(function(k){
+    return '<div class="kpi" style="--c:'+k.c+'"><div class="lab"><span class="dot"></span>'+k.lab+
+      '</div><div class="v num">'+fmt(k.v)+(k.suf?'<small>'+k.suf+'</small>':'')+
+      '</div><div class="cap">'+k.cap+'</div></div>';
+  }).join("");
+
+  // daily steps
+  var counts = days.map(function(_,i){ return act[i]? dailyCounts(days,emps,i):null; });
+  var maxCame=1;
+  counts.forEach(function(c){ if(c){ var v=c.present+c.late; if(v>maxCame)maxCame=v; } });
+  var stepsEl=document.getElementById("steps");
+  stepsEl.innerHTML = days.map(function(dnum,i){
+    if(!act[i]) return '<div class="step future"><div class="bar-track"><div class="bar" style="height:4px"></div></div><div class="cnt">·</div><div class="date">'+dnum+'</div></div>';
+    var c=counts[i]; var came=c.present+c.late; var h=Math.max(6,Math.round(came/maxCame*96));
+    var dow=DOW_TH[meta.dows[i]];
+    return '<div class="step'+(sel.day===i?' sel':'')+'" data-i="'+i+'">'+
+      '<div class="bar-track"><div class="bar" style="height:'+h+'px"></div></div>'+
+      '<div class="cnt num">'+came+'</div>'+
+      '<div class="date"><b>'+dnum+'</b> '+MONTH_TH[meta.m]+'<br>'+dow+'</div></div>';
+  }).join("");
+  document.getElementById("dailySub").textContent = d.sheet + (d.asOf? " · ถึงวันที่ "+d.asOf : "");
+  if(sel.day==null) sel.day=lastIdx;
+  renderDayDetail(counts);
+
+  stepsEl.querySelectorAll(".step[data-i]").forEach(function(el){
+    el.onclick=function(){ sel.day=+el.dataset.i; render(); };
+  });
+
+  renderTable();
+  renderLegend();
+  document.getElementById("foot").textContent="Daiki · แดชบอร์ดการมาทำงาน — ข้อมูลจาก "+d.sheet+" ("+emps.length+" รายการ)";
+}
+
+function renderDayDetail(counts){
+  var el=document.getElementById("dayDetail");
+  var i=sel.day;
+  if(i==null||!counts[i]){ el.innerHTML=""; return; }
+  var c=counts[i]; var d=DATA;
+  var head='วันที่ '+d.days[i]+' '+MONTH_TH[d.meta.m]+' '+(d.meta.y+543);
+  var order=["present","late","sick","personal","vacation","absent","dayoff","holiday"];
+  var chips=order.map(function(k){
+    var s=KEYMAP[k];
+    return '<span class="chip"><span class="cd" style="background:'+s.color+'"></span>'+s.label+' <b>'+c[k]+'</b></span>';
+  }).join("");
+  el.innerHTML='<span class="dh">'+head+'</span>'+chips;
+}
+
+function passFilter(e){
+  var q=document.getElementById("q").value.trim().toLowerCase();
+  var dept=document.getElementById("dept").value;
+  if(dept && (e.pos||"")!==dept) return false;
+  if(q){
+    var hay=((e.name||"")+" "+(e.nick||"")).toLowerCase();
+    if(hay.indexOf(q)<0) return false;
+  }
+  return true;
+}
+
+function renderTable(){
+  var d=DATA; var emps=d.employees.slice();
+  var sortv=document.getElementById("sort").value;
+  var rows=emps.filter(passFilter);
+  rows.sort(function(a,b){
+    switch(sortv){
+      case "name": return (a.name||"").localeCompare(b.name||"","th");
+      case "absent": return b._c.absent-a._c.absent;
+      case "late": return b._c.late-a._c.late;
+      case "leave": return b._leave-a._leave;
+      case "rate": return (a._rate==null?999:a._rate)-(b._rate==null?999:b._rate);
+      default: return a._idx-b._idx;
+    }
+  });
+  document.getElementById("tblSub").textContent="แสดง "+rows.length+" จาก "+emps.length+" คน";
+
+  function stat(v,cls){ return '<td><span class="stat '+(v?cls:'z')+'">'+(v||"–")+'</span></td>'; }
+  var head='<table><thead><tr>'+
+    '<th style="width:44px">#</th>'+
+    '<th class="l">พนักงาน</th>'+
+    '<th>มาทำงาน</th><th>มาสาย</th><th>ลาป่วย</th><th>ลากิจ</th><th class="hide">พักร้อน</th><th>ขาดงาน</th>'+
+    '<th style="width:150px">อัตราการมา</th></tr></thead><tbody>';
+  var body=rows.map(function(e){
+    var c=e._c;
+    var rate=e._rate;
+    var rc = rate==null? "var(--dayoff)" : rate>=95?"var(--present)":rate>=85?"var(--late)":"var(--absent)";
+    var tr='<tr class="emp-row" data-id="'+e._idx+'">'+
+      '<td class="idx num">'+(e._idx+1)+'</td>'+
+      '<td class="who"><div class="nm">'+esc(e.name)+(e.nick?' <span class="nick">('+esc(e.nick)+')</span>':'')+'</div>'+
+        '<div class="role">'+esc(e.pos||"—")+'</div></td>'+
+      stat(c.present,"present")+stat(c.late,"late")+stat(c.sick,"sick")+stat(c.personal,"personal")+
+      '<td class="hide"><span class="stat '+(c.vacation?'vacation':'z')+'">'+(c.vacation||"–")+'</span></td>'+
+      stat(c.absent,"absent")+
+      '<td><div class="rate">'+(rate==null?'<span class="rv" style="color:var(--muted)">–</span>':
+        '<div class="rbar"><div class="rfill" style="width:'+rate+'%;background:'+rc+'"></div></div><span class="rv" style="color:'+rc+'">'+rate+'%</span>')+
+        '</div></td></tr>';
+    // timeline row
+    var cells=e.cells.map(function(raw,i){
+      var k=classify(raw); var s=KEYMAP[k];
+      var m = s? s.short : (k==="other"? (""+raw).trim() : "");
+      var cls = (k===""||k==="other")? "empty" : k;
+      return '<div class="cell '+cls+'"><span class="d">'+d.days[i]+'</span><span class="m">'+(m||"·")+'</span></div>';
+    }).join("");
+    var tl='<tr class="tl-row"><td colspan="9"><div class="tl" id="tl'+e._idx+'">'+
+      '<div class="tl-h">ไทม์ไลน์รายวัน · '+esc(e.name)+'</div><div class="tl-grid">'+cells+'</div></div></td></tr>';
+    return tr+tl;
+  }).join("");
+  document.getElementById("tblWrap").innerHTML = rows.length? head+body+'</tbody></table>'
+    : '<div class="empty-state"><h3>ไม่พบพนักงานตามเงื่อนไข</h3><div>ลองล้างคำค้นหาหรือเลือกแผนกอื่น</div></div>';
+
+  document.querySelectorAll(".emp-row").forEach(function(tr){
+    tr.onclick=function(){
+      var id=+tr.dataset.id;
+      var tl=document.getElementById("tl"+id);
+      var isOpen=tl.classList.contains("open");
+      document.querySelectorAll(".tl.open").forEach(function(x){x.classList.remove("open");});
+      if(!isOpen) tl.classList.add("open");
+    };
+  });
+}
+
+function renderLegend(){
+  document.getElementById("legend").innerHTML="คำอธิบายสี:&nbsp;&nbsp;"+STATUS.map(function(s){
+    return '<span><i style="background:'+s.color+'"></i>'+s.label+'</span>';
+  }).join("");
+}
+
+function esc(s){ return (""+(s==null?"":s)).replace(/[&<>]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[m];}); }
+
+// ------- department options -------
+function buildDept(){
+  var set={}; DATA.employees.forEach(function(e){ if(e.pos) set[e.pos]=(set[e.pos]||0)+1; });
+  var keys=Object.keys(set).sort(function(a,b){return set[b]-set[a];});
+  var el=document.getElementById("dept");
+  el.innerHTML='<option value="">ทุกแผนก / ตำแหน่ง</option>'+keys.map(function(k){
+    return '<option value="'+esc(k)+'">'+esc(k)+' ('+set[k]+')</option>';
+  }).join("");
+}
+
+// ------- load a dataset (from demo or upload) -------
+function loadData(d){
+  d.meta = monthMeta(d.asOf, d.days);
+  d.employees.forEach(function(e,i){ e._idx=i; computeEmp(e,d.days,d.meta); });
+  d._active = activeDays(d.days, d.employees);
+  DATA=d; sel.day=null;
+  buildDept();
+  render();
+}
+
+// ------- Excel upload / parse -------
+function parseSheetToData(ws, sheetName){
+  var A=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,defval:null});
+  // find header row containing ชื่อ-นามสกุล
+  var hr=-1;
+  for(var i=0;i<A.length;i++){
+    if(A[i] && A[i].some(function(c){return (""+ (c||"")).trim()==="ชื่อ-นามสกุล";})){ hr=i; break; }
+  }
+  if(hr<0) throw new Error("ไม่พบหัวตาราง 'ชื่อ-นามสกุล' ในชีตนี้ — เลือกชีตรูปแบบ Daiki");
+  var H=A[hr];
+  function col(label){ for(var j=0;j<H.length;j++){ if((""+ (H[j]||"")).trim()===label) return j; } return -1; }
+  var cN=col("ชื่อ-นามสกุล"), cNick=col("ชื่อเล่น"), cPos=col("ตำแหน่ง"), cStart=col("เริ่มทำงาน"), cTen=col("อายุงาน");
+  var daycols=[];
+  for(var j=0;j<H.length;j++){
+    var f=parseFloat((""+ (H[j]||"")).trim()); var dd=Math.round(f);
+    if(!isNaN(f) && dd>=1 && dd<=31 && Math.abs(f-dd)<1e-6) daycols.push({d:dd,j:j});
+  }
+  daycols.sort(function(a,b){return a.d-b.d;});
+  // as-of date: scan rows above+header for a date-like value
+  var asOf=null;
+  for(var i=0;i<=hr;i++){ if(!A[i])continue; for(var k=0;k<A[i].length;k++){ var v=A[i][k]; if(v && /^\d{4}-\d{2}-\d{2}/.test((""+v))){ asOf=(""+v).slice(0,10);} var dt=parseExcelDate(v); if(dt) asOf=dt; } }
+  var emps=[];
+  for(var r=hr+1;r<A.length;r++){
+    var row=A[r]||[]; var nm=cN>=0?row[cN]:null;
+    if(!(nm && (""+nm).trim()!=="")) continue;
+    var cells=daycols.map(function(dc){
+      var v=row[dc.j]; if(v==null) return "";
+      var s=(""+v).trim(); if(s==="1"||s==="1.0") s="1"; return s;
+    });
+    // รหัสพนักงาน (เช่น DK-212) มักอยู่คอลัมน์ซ้ายของชื่อ — เก็บถ้ารูปแบบตรง
+    var code="";
+    if(cN>0 && row[cN-1]!=null){ var cc=(""+row[cN-1]).trim(); if(/^[A-Za-z]{1,4}-?\d+$/.test(cc)) code=cc; }
+    emps.push({code:code, name:(""+nm).trim(), nick:cNick>=0&&row[cNick]!=null?(""+row[cNick]).trim():"",
+      pos:cPos>=0&&row[cPos]!=null?(""+row[cPos]).trim():"", cells:cells});
+  }
+  return {sheet:sheetName, asOf:asOf, days:daycols.map(function(x){return x.d;}), employees:emps};
+}
+function parseExcelDate(v){
+  if(v==null) return null;
+  if(typeof v==="number" && v>30000 && v<60000){ // excel serial
+    var dt=new Date(Math.round((v-25569)*86400*1000)); return dt.toISOString().slice(0,10);
+  }
+  var m=(""+v).match(/^(\d{4})-(\d{2})-(\d{2})/); if(m) return m[1]+"-"+m[2]+"-"+m[3];
+  return null;
+}
+
+var WB=null;
+document.getElementById("fileIn").addEventListener("change",function(ev){
+  var f=ev.target.files[0]; if(!f) return;
+  var rd=new FileReader();
+  rd.onload=function(e){
+    try{
+      WB=XLSX.read(new Uint8Array(e.target.result),{type:"array",cellDates:false});
+      var sel=document.getElementById("sheetSel");
+      // prefer sheets starting with Daiki, else all
+      var names=WB.SheetNames;
+      sel.innerHTML=names.map(function(n){return '<option>'+esc(n)+'</option>';}).join("");
+      // pick a Daiki sheet if present
+      var pref=names.filter(function(n){return /daiki/i.test(n);});
+      var choose=pref.length?pref[pref.length-1]:names[names.length-1];
+      sel.value=choose;
+      document.getElementById("demoTag").classList.remove("on");
+      loadSelectedSheet();
+    }catch(err){ alert("อ่านไฟล์ไม่สำเร็จ: "+err.message); }
+  };
+  rd.readAsArrayBuffer(f);
+});
+function loadSelectedSheet(){
+  if(!WB) return;
+  var name=document.getElementById("sheetSel").value;
+  try{
+    var d=parseSheetToData(WB.Sheets[name], name);
+    if(!d.employees.length) throw new Error("ไม่พบข้อมูลพนักงานในชีตนี้");
+    loadData(d);
+  }catch(err){ alert("ชีต \""+name+"\": "+err.message); }
+}
+document.getElementById("sheetSel").addEventListener("change",function(){ if(WB) loadSelectedSheet(); });
+
+// ------- export -------
+document.getElementById("exportBtn").addEventListener("click",function(){
+  var d=DATA; var rows=d.employees.filter(passFilter);
+  var aoa=[["ลำดับ","ชื่อ-นามสกุล","ชื่อเล่น","ตำแหน่ง","มาทำงาน","มาสาย","ลาป่วย","ลากิจ","พักร้อน","ขาดงาน","หยุดประจำ","วันหยุด","อัตราการมา(%)"]];
+  rows.forEach(function(e,i){ var c=e._c;
+    aoa.push([i+1,e.name,e.nick,e.pos,c.present,c.late,c.sick,c.personal,c.vacation,c.absent,c.dayoff,c.holiday,e._rate==null?"":e._rate]);
+  });
+  var ws=XLSX.utils.aoa_to_sheet(aoa);
+  var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"สรุปการมาทำงาน");
+  XLSX.writeFile(wb,"สรุปการมาทำงาน_"+(d.sheet||"Daiki").replace(/\s+/g,"_")+".xlsx");
+});
+
+// ------- controls wiring -------
+["q","dept","sort"].forEach(function(id){
+  document.getElementById(id).addEventListener("input",renderTable);
+  document.getElementById(id).addEventListener("change",renderTable);
+});
+
+// ============ Supabase ============
+// ⬇️ ใส่ค่าตายตัวตรงนี้ที่เดียว ไม่ต้องพิมพ์ทุกครั้ง
+//    แก้ SUPABASE_URL เป็น Project URL ของคุณ (Supabase → Project Settings → API → Project URL)
+var SUPABASE_URL="https://malleyieygvcqfgkzxnf.supabase.co";
+var SUPABASE_ANON_KEY="sb_publishable_Bk-HtUSrZdDXAAefn6R0hw_AxKiV9-g";
+var SB=null;
+
+function dbSay(msg,cls){ var el=$("dbMsg"); el.textContent=msg; el.className="dbmsg"+(cls?" "+cls:""); }
+
+function pad2(n){return (n<10?"0":"")+n;}
+function ymOfData(){ return DATA&&DATA.meta? DATA.meta.y+"-"+pad2(DATA.meta.m+1):""; }
+
+function connectDB(){
+  var url=$("dbUrl").value.trim()||SUPABASE_URL;
+  var key=$("dbKey").value.trim()||SUPABASE_ANON_KEY;
+  if(!url||!key){ dbSay("กรุณากรอก Supabase URL และ anon key","err"); return false; }
+  if(!window.supabase){ dbSay("โหลดไลบรารี Supabase ไม่สำเร็จ (ตรวจอินเทอร์เน็ต)","err"); return false; }
+  try{ SB=window.__getSB(); if(!SB) throw new Error("no client"); dbSay("เชื่อมต่อแล้ว ✓ — พร้อมนำเข้า/โหลดข้อมูล","ok"); return true; }
+  catch(e){ dbSay("เชื่อมต่อไม่สำเร็จ: "+e.message,"err"); return false; }
+}
+
+// นำเข้าข้อมูลที่กำลังแสดงอยู่ (จาก Excel/demo) ขึ้น Supabase
+async function importToDB(){
+  if(!SB && !connectDB()) return;
+  var d=DATA; if(!d||!d.employees.length){ dbSay("ไม่มีข้อมูลให้นำเข้า","err"); return; }
+  try{
+    dbSay("กำลังนำเข้าพนักงาน...","");
+    // 1) upsert พนักงาน (key = full_name) — กันชื่อซ้ำในไฟล์ (Postgres upsert ห้าม key ซ้ำในคำสั่งเดียว)
+    var empSeen={}, empRows=[];
+    d.employees.forEach(function(e){
+      if(empSeen[e.name]) return;          // ข้ามชื่อซ้ำ (เก็บอันแรก)
+      empSeen[e.name]=true;
+      empRows.push({emp_code:e.code||null, full_name:e.name, nickname:e.nick||null, position:e.pos||null, seq:empRows.length});
+    });
+    var up=await SB.from("daiki_employees").upsert(empRows,{onConflict:"full_name"}).select("id,full_name");
+    if(up.error) throw up.error;
+    var idByName={}; up.data.forEach(function(r){ idByName[r.full_name]=r.id; });
+    // 2) สร้างแถวการมาทำงาน — กัน (คน+วัน) ซ้ำด้วย
+    var attSeen={}, attRows=[];
+    d.employees.forEach(function(e){
+      var eid=idByName[e.name]; if(!eid) return;
+      e.cells.forEach(function(raw,i){
+        var k=classify(raw); if(k===""||k==="other") return;
+        var day=d.days[i];
+        var wd=d.meta.y+"-"+pad2(d.meta.m+1)+"-"+pad2(day);
+        var key=eid+"|"+wd; if(attSeen[key]) return; attSeen[key]=true;
+        attRows.push({employee_id:eid, work_date:wd, raw_code:(""+raw).trim(), status_key:k, source:"excel_import"});
+      });
+    });
+    dbSay("กำลังนำเข้าการมาทำงาน "+attRows.length+" รายการ...","");
+    // upsert ทีละก้อน 500 แถว
+    for(var s=0;s<attRows.length;s+=500){
+      var chunk=attRows.slice(s,s+500);
+      var r=await SB.from("daiki_attendance").upsert(chunk,{onConflict:"employee_id,work_date"});
+      if(r.error) throw r.error;
+    }
+    dbSay("นำเข้าสำเร็จ ✓ พนักงาน "+empRows.length+" คน · การมาทำงาน "+attRows.length+" รายการ ("+ymOfData()+")","ok");
+  }catch(e){ dbSay("นำเข้าไม่สำเร็จ: "+(e.message||e),"err"); }
+}
+
+// โหลดข้อมูลเดือนที่เลือกจาก Supabase มาแสดง
+async function loadFromDB(){
+  if(!SB && !connectDB()) return;
+  var ym=$("dbMonth").value || ymOfData();
+  if(!/^\d{4}-\d{2}$/.test(ym)){ dbSay("เลือกเดือนก่อน (ช่องเดือน)","err"); return; }
+  try{
+    dbSay("กำลังโหลดข้อมูลเดือน "+ym+"...","");
+    var start=ym+"-01";
+    var y=+ym.slice(0,4), m=+ym.slice(5,7);
+    var end=(m===12?(y+1)+"-01":y+"-"+pad2(m+1))+"-01";
+    var r=await SB.from("daiki_attendance")
+      .select("work_date,raw_code,status_key,daiki_employees(full_name,nickname,position,emp_code,seq)")
+      .gte("work_date",start).lt("work_date",end).limit(20000);
+    if(r.error) throw r.error;
+    if(!r.data.length){ dbSay("ไม่พบข้อมูลเดือน "+ym+" ในฐานข้อมูล","err"); return; }
+    // ประกอบเป็นโครงสร้าง DATA
+    var daySet={}, empMap={};
+    r.data.forEach(function(row){
+      var day=+row.work_date.slice(8,10); daySet[day]=1;
+      var e=row.daiki_employees||{}; var nm=e.full_name||"(ไม่ระบุ)";
+      if(!empMap[nm]) empMap[nm]={code:e.emp_code||"",name:nm,nick:e.nickname||"",pos:e.position||"",seq:(e.seq==null?999999:e.seq),byDay:{}};
+      empMap[nm].byDay[day]=row.raw_code||statusToRaw(row.status_key);
+    });
+    var days=Object.keys(daySet).map(Number).sort(function(a,b){return a-b;});
+    var employees=Object.keys(empMap).map(function(nm){ return empMap[nm]; })
+      .sort(function(a,b){ return a.seq-b.seq || (a.name||"").localeCompare(b.name||"","th"); })
+      .map(function(e){ e.cells=days.map(function(d){ return e.byDay[d]!=null? (""+e.byDay[d]):""; }); delete e.byDay; return e; });
+    var lastDay=days[days.length-1];
+    loadData({sheet:"ฐานข้อมูล "+ym, asOf:ym+"-"+pad2(lastDay), days:days, employees:employees});
+    $("demoTag").classList.remove("on");
+    dbSay("โหลดจาก DB สำเร็จ ✓ เดือน "+ym+" · "+employees.length+" คน","ok");
+  }catch(e){ dbSay("โหลดไม่สำเร็จ: "+(e.message||e),"err"); }
+}
+function statusToRaw(k){ var s=KEYMAP[k]; return s? s.codes[0]:""; }
+
+$("dbConnect").addEventListener("click",connectDB);
+$("dbImport").addEventListener("click",importToDB);
+$("dbLoad").addEventListener("click",loadFromDB);
+
+// ------- init with demo -------
+loadData(JSON.parse($("demoData").textContent));
+if(ymOfData()) $("dbMonth").value=ymOfData();
+
+// ------- auto-connect ถ้าตั้งค่า URL/key ไว้แล้ว -------
+(function autoDB(){
+  var ready = SUPABASE_URL && SUPABASE_ANON_KEY && !/PASTE-PROJECT-URL/.test(SUPABASE_URL);
+  $("dbUrl").value = /PASTE-PROJECT-URL/.test(SUPABASE_URL)? "" : SUPABASE_URL;
+  $("dbKey").value = SUPABASE_ANON_KEY;
+  if(ready && connectDB()){ loadFromDB(); }   // เชื่อม + โหลดเดือนปัจจุบันจาก DB อัตโนมัติ
+})();
+
+window.__dashRefresh=function(){try{if(SB)loadFromDB();}catch(e){}};
+})();
+</script>
+<script>
+(function(){
+var ROOT=document.getElementById('view-grid');var $=function(id){return ROOT.querySelector('#'+id);};
+
+"use strict";
+
+
+// ============ ตั้งค่า Supabase (ใส่ที่เดียว ไม่ต้องพิมพ์ทุกครั้ง) ============
+//   แก้ SUPABASE_URL เป็น Project URL ของคุณ (Supabase → Project Settings → API → Project URL)
+var SUPABASE_URL="https://malleyieygvcqfgkzxnf.supabase.co";
+var SUPABASE_ANON_KEY="sb_publishable_Bk-HtUSrZdDXAAefn6R0hw_AxKiV9-g";
+
+var STATUS=[
+  {key:"present", label:"มาทำงาน", code:"1", color:"var(--present)"},
+  {key:"late",    label:"มาสาย",   code:"ส", color:"var(--late)"},
+  {key:"sick",    label:"ลาป่วย",  code:"ป", color:"var(--sick)"},
+  {key:"personal",label:"ลากิจ",   code:"ก", color:"var(--personal)"},
+  {key:"vacation",label:"พักร้อน", code:"พ", color:"var(--vacation)"},
+  {key:"absent",  label:"ขาดงาน",  code:"ข", color:"var(--absent)"},
+  {key:"dayoff",  label:"หยุดประจำ",code:"w",color:"var(--dayoff)"},
+  {key:"holiday", label:"วันหยุด", code:"h", color:"var(--holiday)"}
+];
+var KEYMAP={}, CODE2KEY={};
+STATUS.forEach(function(s){ KEYMAP[s.key]=s; CODE2KEY[s.code]=s.key; if(s.key==="present")CODE2KEY["1.0"]=s.key; });
+function classify(raw){ if(raw==null) return ""; var s=(""+raw).trim(); if(s==="")return"";
+  if(CODE2KEY[s])return CODE2KEY[s]; if(parseFloat(s)===1)return"present"; return "other"; }
+var DOW_TH=["อา","จ","อ","พ","พฤ","ศ","ส"];
+var MONTH_TH=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+
+// ---------- state ----------
+var Y=2026, M=6;            // M = 0-based month (July=6)
+var EMP=[];                  // {id, dbId, code, name, nick, pos, cells:{day:rawCode}}
+var brush="present";
+var SB=null, LIVE=false, channel=null;
+var saveQueue={}, recentLocal={}, flushTimer=null;
+
+function daysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
+function ymd(day){ return Y+"-"+p2(M+1)+"-"+p2(day); }
+function p2(n){ return (n<10?"0":"")+n; }
+function esc(s){ return (""+(s==null?"":s)).replace(/[&<>]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[m];}); }
+
+// ---------- brushes ----------
+function renderBrushes(){
+  var html=STATUS.map(function(s){
+    return '<button class="brush'+(brush===s.key?' active':'')+'" data-k="'+s.key+'">'+
+      '<span class="sw" style="background:'+s.color+'">'+s.code+'</span>'+s.label+'</button>';
+  }).join("");
+  html+='<button class="brush eraser'+(brush==="__erase"?' active':'')+'" data-k="__erase"><span class="sw"></span>ล้าง</button>';
+  html+='<button class="brush note'+(brush==="__note"?' active':'')+'" data-k="__note"><span class="sw" style="background:var(--ink)">✎</span>โน๊ต</button>';
+  $("brushList").innerHTML=html;
+  $("brushList").querySelectorAll(".brush").forEach(function(b){
+    b.onclick=function(){ brush=b.dataset.k; renderBrushes(); };
+  });
+}
+
+// ---------- grid ----------
+function renderGrid(){
+  var nd=daysInMonth(Y,M);
+  var head='<thead><tr>'+
+    '<th class="cn c-idx">#</th>'+
+    '<th class="cn c-name" style="text-align:left;padding-left:10px">พนักงาน ('+EMP.length+')</th>'+
+    '<th class="cn c-sum">มา</th>';
+  for(var d=1;d<=nd;d++){
+    var dow=new Date(Y,M,d).getDay(); var wk=(dow===0||dow===6);
+    head+='<th class="hcol'+(wk?' wknd':'')+'"><div class="dnum">'+d+'</div><div class="dow">'+DOW_TH[dow]+'</div></th>';
+  }
+  head+='</tr></thead>';
+
+  var body='<tbody>';
+  EMP.forEach(function(e,idx){
+    body+='<tr>'+
+      '<td class="cn c-idx idx num" style="color:var(--muted)">'+(idx+1)+'</td>'+
+      '<td class="cn c-name"><div class="nm">'+esc(e.name)+(e.nick?' <span class="nick">('+esc(e.nick)+')</span>':'')+'</div><div class="role">'+esc(e.pos||"—")+'</div></td>'+
+      '<td class="cn c-sum" id="sum_'+idx+'">0</td>';
+    for(var d=1;d<=nd;d++){
+      var raw=e.cells[d]||""; var k=classify(raw); var dow=new Date(Y,M,d).getDay(); var wk=(dow===0||dow===6);
+      var cls=(k&&k!=="other")?k:(wk?"wknd":"");
+      var nt=e.notes&&e.notes[d]?e.notes[d]:"";
+      body+='<td class="cell '+cls+(nt?" has-note":"")+'" id="c_'+idx+'_'+d+'" data-i="'+idx+'" data-d="'+d+'"'+(nt?' title="📝 '+esc(nt)+'"':'')+'>'+(raw==="1"?"1":esc(raw))+'</td>';
+    }
+    body+='</tr>';
+  });
+  body+='</tbody>';
+
+  var foot='<tfoot><tr><td class="cn c-idx"></td><td class="cn c-name foot-lab">มาทำงาน (คน)</td><td class="cn c-sum" id="grand">0</td>';
+  for(var d=1;d<=nd;d++){ foot+='<td id="col_'+d+'">0</td>'; }
+  foot+='</tr></tfoot>';
+
+  $("grid").innerHTML=head+body+foot;
+  wireCells();
+  recomputeAll();
+}
+
+// ---------- editing ----------
+var painting=false;
+function wireCells(){
+  var cells=$("grid").querySelectorAll("td.cell");
+  cells.forEach(function(td){
+    td.addEventListener("mousedown",function(ev){ ev.preventDefault();
+      if(brush==="__note"){ editNote(+td.dataset.i,+td.dataset.d); return; }
+      painting=true; applyBrush(+td.dataset.i,+td.dataset.d); });
+    td.addEventListener("mouseenter",function(){ if(painting && brush!=="__note") applyBrush(+td.dataset.i,+td.dataset.d); });
+  });
+}
+document.addEventListener("mouseup",function(){ painting=false; });
+
+// ---------- โน๊ตรายวัน ----------
+function editNote(idx,day){
+  var e=EMP[idx]; if(!e) return;
+  var cur=(e.notes&&e.notes[day])||"";
+  var t=prompt("โน๊ตวันที่ "+day+" — "+e.name+"\n(ลบข้อความแล้วตกลง = ลบโน๊ต)", cur);
+  if(t===null) return;            // กดยกเลิก
+  t=t.trim();
+  if(!e.notes) e.notes={};
+  if(t===""){ delete e.notes[day]; } else { e.notes[day]=t; }
+  paintCell(idx,day);
+  saveNote(idx,day,t===""?null:t);
+}
+async function saveNote(idx,day,text){
+  if(!LIVE) return; var e=EMP[idx]; if(!e.dbId) return;
+  var key=e.dbId+"|"+ymd(day); recentLocal[key]=Date.now();
+  setSave("saving","กำลังบันทึกโน๊ต...");
+  try{
+    var r=await SB.from("daiki_attendance").upsert({employee_id:e.dbId, work_date:ymd(day), note:text},{onConflict:"employee_id,work_date"});
+    if(r.error) throw r.error;
+    setSave("saved","บันทึกโน๊ตแล้ว ✓");
+  }catch(err){ setSave("err","บันทึกโน๊ตไม่สำเร็จ: "+(err.message||err)); }
+}
+
+function applyBrush(idx,day){
+  var e=EMP[idx]; if(!e) return;
+  var code = (brush==="__erase")? "" : KEYMAP[brush].code;
+  var cur = e.cells[day]||"";
+  if(cur===code) return;
+  if(code==="") delete e.cells[day]; else e.cells[day]=code;
+  paintCell(idx,day);
+  recomputeSoon();
+  queueSave(idx,day,code);
+}
+
+function paintCell(idx,day){
+  var td=$("c_"+idx+"_"+day); if(!td) return;
+  var e=EMP[idx]; var raw=e.cells[day]||""; var k=classify(raw);
+  var dow=new Date(Y,M,day).getDay(); var wk=(dow===0||dow===6);
+  var nt=(e.notes&&e.notes[day])||"";
+  td.className="cell "+((k&&k!=="other")?k:(wk?"wknd":""))+(nt?" has-note":"");
+  td.textContent = raw==="1"?"1":raw;
+  if(nt) td.title="📝 "+nt; else td.removeAttribute("title");
+}
+function flashCell(idx,day){ var td=$("c_"+idx+"_"+day); if(!td)return; td.classList.remove("flash"); void td.offsetWidth; td.classList.add("flash"); }
+
+var recomputeTimer=null;
+function recomputeSoon(){ if(recomputeTimer)return; recomputeTimer=requestAnimationFrame(function(){recomputeTimer=null;recomputeAll();}); }
+function recomputeAll(){
+  var nd=daysInMonth(Y,M); var colCame=new Array(nd+1).fill(0); var grand=0;
+  EMP.forEach(function(e,idx){
+    var came=0;
+    for(var d=1;d<=nd;d++){ var k=classify(e.cells[d]); if(k==="present"||k==="late"){came++;colCame[d]++;} }
+    var el=$("sum_"+idx); if(el) el.textContent=came;
+  });
+  for(var d=1;d<=nd;d++){ var el=$("col_"+d); if(el) el.textContent=colCame[d]; grand+=colCame[d]; }
+  var g=$("grand"); if(g) g.textContent=grand;
+}
+
+// ---------- save queue (DB mode) ----------
+function setSave(state,txt){ var el=$("saveInd"); el.className="save-ind "+(state||""); $("saveTxt").textContent=txt; }
+function queueSave(idx,day,code){
+  if(!LIVE) return;                       // โหมดทดลองไม่บันทึก
+  var e=EMP[idx]; if(!e.dbId){ return; }   // ต้องมี id ใน DB ก่อน
+  var key=e.dbId+"|"+ymd(day);
+  saveQueue[key]={dbId:e.dbId, day:day, code:code};
+  recentLocal[key]=Date.now();
+  setSave("saving","กำลังบันทึก...");
+  if(flushTimer) clearTimeout(flushTimer);
+  flushTimer=setTimeout(flushSaves,600);
+}
+async function flushSaves(){
+  var items=Object.keys(saveQueue).map(function(k){return saveQueue[k];});
+  saveQueue={};
+  if(!items.length){ return; }
+  try{
+    var ups=[], dels=[];
+    items.forEach(function(it){
+      if(it.code===""){ dels.push(it); }
+      else{ ups.push({employee_id:it.dbId, work_date:ymd(it.day), raw_code:it.code, status_key:classify(it.code), source:"grid"}); }
+    });
+    if(ups.length){ var r=await SB.from("daiki_attendance").upsert(ups,{onConflict:"employee_id,work_date"}); if(r.error) throw r.error; }
+    for(var i=0;i<dels.length;i++){ var dr=await SB.from("daiki_attendance").delete().match({employee_id:dels[i].dbId, work_date:ymd(dels[i].day)}); if(dr.error) throw dr.error; }
+    setSave("saved","บันทึกแล้ว ✓");
+  }catch(e){ setSave("err","บันทึกไม่สำเร็จ: "+(e.message||e)); }
+}
+
+// ---------- add employee ----------
+$("addEmp").addEventListener("click", async function(){
+  var name=prompt("ชื่อ-นามสกุล:"); if(!name||!name.trim())return; name=name.trim();
+  var nick=(prompt("ชื่อเล่น (เว้นว่างได้):")||"").trim();
+  var pos=(prompt("ตำแหน่ง (เว้นว่างได้):")||"").trim();
+  var row={id:"tmp_"+Date.now(), dbId:null, code:"", name:name, nick:nick, pos:pos, cells:{}, notes:{}};
+  if(LIVE){
+    try{ var r=await SB.from("daiki_employees").upsert({full_name:name,nickname:nick||null,position:pos||null},{onConflict:"full_name"}).select("id").single();
+      if(r.error) throw r.error; row.dbId=r.data.id; }
+    catch(e){ alert("เพิ่มพนักงานไม่สำเร็จ: "+(e.message||e)); return; }
+  }
+  EMP.push(row); renderGrid();
+});
+
+// ---------- Supabase ----------
+function connectDB(){
+  var url=$("dbUrl").value.trim()||SUPABASE_URL, key=$("dbKey").value.trim()||SUPABASE_ANON_KEY;
+  if(/PASTE-PROJECT-URL/.test(url)) url="";
+  if(!url||!key){ dbSay("ใส่ Supabase URL ในโค้ด (ตัวแปร SUPABASE_URL) ก่อน","err"); return false; }
+  if(!window.supabase){ dbSay("โหลดไลบรารี Supabase ไม่สำเร็จ","err"); return false; }
+  try{ SB=window.__getSB(); if(!SB) throw new Error("no client"); dbSay("เชื่อมต่อแล้ว ✓ กด \"โหลดเดือนนี้\"","ok"); return true; }
+  catch(e){ dbSay("เชื่อมต่อไม่สำเร็จ: "+e.message,"err"); return false; }
+}
+function dbSay(msg,cls){ var el=$("dbMsg"); el.textContent=msg; el.className="dbmsg"+(cls?" "+cls:""); }
+
+async function loadMonth(){
+  if(!SB && !connectDB()) return;
+  var mv=$("dbMonth").value; if(/^\d{4}-\d{2}$/.test(mv)){ Y=+mv.slice(0,4); M=(+mv.slice(5,7))-1; }
+  try{
+    dbSay("กำลังโหลดพนักงาน...","");
+    var er=await SB.from("daiki_employees").select("id,emp_code,full_name,nickname,position,is_active,seq").eq("is_active",true).order("seq",{ascending:true,nullsFirst:false}).order("full_name",{ascending:true}).limit(2000);
+    if(er.error) throw er.error;
+    if(!er.data.length){ dbSay("ยังไม่มีพนักงานใน DB — นำเข้าจากแดชบอร์ดก่อน หรือกด \"＋ เพิ่มพนักงาน\"","err"); }
+    EMP=er.data.map(function(r){ return {id:r.id, dbId:r.id, code:r.emp_code||"", name:r.full_name, nick:r.nickname||"", pos:r.position||"", cells:{}, notes:{}}; });
+    var byId={}; EMP.forEach(function(e,i){ byId[e.dbId]=i; }); EMP._byId=byId;
+    dbSay("กำลังโหลดข้อมูลเดือน "+mv+"...","");
+    var start=Y+"-"+p2(M+1)+"-01", end=(M===11?(Y+1)+"-01":Y+"-"+p2(M+2))+"-01";
+    var ar=await SB.from("daiki_attendance").select("employee_id,work_date,raw_code,status_key,note").gte("work_date",start).lt("work_date",end).limit(50000);
+    if(ar.error) throw ar.error;
+    ar.data.forEach(function(row){ var i=byId[row.employee_id]; if(i==null)return; var day=+row.work_date.slice(8,10);
+      if(row.status_key){ EMP[i].cells[day]=row.raw_code||(KEYMAP[row.status_key]?KEYMAP[row.status_key].code:""); }
+      if(row.note){ EMP[i].notes[day]=row.note; } });
+    LIVE=true; $("modeTag").textContent="เชื่อมต่อแล้ว · Realtime"; $("modeTag").className="mode-tag live";
+    renderGrid(); subscribeRealtime();
+    dbSay("โหลดสำเร็จ ✓ "+EMP.length+" คน · เดือน "+mv+" — แก้ไขได้เลย (บันทึกอัตโนมัติ)","ok");
+    setSave("saved","พร้อม (บันทึกอัตโนมัติ)");
+  }catch(e){ dbSay("โหลดไม่สำเร็จ: "+(e.message||e),"err"); }
+}
+
+function subscribeRealtime(){
+  if(!SB) return;
+  if(channel){ SB.removeChannel(channel); channel=null; }
+  channel=SB.channel("daiki_grid_"+Y+"_"+M)
+    .on("postgres_changes",{event:"*",schema:"public",table:"daiki_attendance"},function(payload){
+      var rec=payload.new||payload.old; if(!rec||!rec.work_date) return;
+      if(rec.work_date.slice(0,7)!==(Y+"-"+p2(M+1))) return;          // เฉพาะเดือนนี้
+      var key=rec.employee_id+"|"+rec.work_date;
+      if(recentLocal[key] && Date.now()-recentLocal[key]<3500) return; // การแก้ของเราเอง
+      var idx=EMP._byId?EMP._byId[rec.employee_id]:undefined;
+      if(idx==null) return;                                            // พนักงานที่ยังไม่ได้โหลด (ข้าม)
+      var day=+rec.work_date.slice(8,10);
+      var e=EMP[idx]; if(!e.notes) e.notes={};
+      if(payload.eventType==="DELETE"){ delete e.cells[day]; delete e.notes[day]; }
+      else{
+        if(rec.status_key){ e.cells[day]=rec.raw_code||(KEYMAP[rec.status_key]?KEYMAP[rec.status_key].code:""); }
+        else { delete e.cells[day]; }
+        if(rec.note){ e.notes[day]=rec.note; } else { delete e.notes[day]; }
+      }
+      paintCell(idx,day); flashCell(idx,day); recomputeSoon();
+    })
+    .subscribe(function(status){ if(status==="SUBSCRIBED") $("rtHint").textContent="🟢 Realtime ทำงาน — การแก้ของคนอื่นจะเด้งขึ้นทันที"; });
+}
+
+$("dbConnect").addEventListener("click",connectDB);
+$("dbLoad").addEventListener("click",loadMonth);
+
+// เปลี่ยนเดือน (แก้บั๊กกดเปลี่ยนเดือนแล้วหน้าไม่เปลี่ยน)
+function gotoMonth(dm){
+  var nm=M+dm, ny=Y;
+  while(nm<0){nm+=12;ny--;} while(nm>11){nm-=12;ny++;}
+  Y=ny; M=nm; $("dbMonth").value=Y+"-"+p2(M+1);
+  if(SB){ loadMonth(); } else { renderGrid(); }
+}
+$("mPrev").addEventListener("click",function(){ gotoMonth(-1); });
+$("mNext").addEventListener("click",function(){ gotoMonth(1); });
+$("dbMonth").addEventListener("change",function(){
+  var mv=$("dbMonth").value; if(!/^\d{4}-\d{2}$/.test(mv)) return;
+  Y=+mv.slice(0,4); M=+mv.slice(5,7)-1;
+  if(SB){ loadMonth(); } else { renderGrid(); }
+});
+
+// ---------- legend ----------
+$("legend").innerHTML="คำอธิบาย:&nbsp;&nbsp;"+STATUS.map(function(s){
+  return '<span><i style="background:'+s.color+'"></i>'+s.label+' ('+s.code+')</span>';
+}).join("");
+
+// ---------- init (โหมดทดลอง) ----------
+(function init(){
+  var s=JSON.parse($("sampleData").textContent);
+  Y=s.y; M=s.m-1;
+  EMP=s.employees.map(function(e,i){ var cells={}; Object.keys(e.cells).forEach(function(d){cells[+d]=e.cells[d];});
+    return {id:"s"+i, dbId:null, code:e.code||"", name:e.name, nick:e.nick||"", pos:e.pos||"", cells:cells, notes:{}}; });
+  $("dbMonth").value=Y+"-"+p2(M+1);
+  renderBrushes(); renderGrid();
+
+  // auto-connect ถ้าตั้งค่า URL/key ไว้แล้ว
+  var ready = SUPABASE_URL && SUPABASE_ANON_KEY && !/PASTE-PROJECT-URL/.test(SUPABASE_URL);
+  $("dbUrl").value = /PASTE-PROJECT-URL/.test(SUPABASE_URL)? "" : SUPABASE_URL;
+  $("dbKey").value = SUPABASE_ANON_KEY;
+  if(ready && connectDB()){ loadMonth(); }
+})();
+
+window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
+})();
+</script>
+<script>
+
+(function(){
+  var ROOT=document.getElementById('view-leave');
+  var $=function(id){return ROOT.querySelector('#'+id);};
+  function esc(s){return (''+(s==null?'':s)).replace(/[&<>]/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[m];});}
+  function say(msg,cls){var el=$('leaveMsg');el.textContent=msg;el.className='dbmsg'+(cls?' '+cls:'');}
+  var POLICY={personal:{label:'ลากิจ',quota:4},sick:{label:'ลาป่วย',quota:30},vacation:{label:'พักร้อน',quota:6,perQuarter:2}};
+  var SB=null, loadedYear=null;
+  function getSB(){ if(!SB) SB=window.__getSB(); return SB; }
+  function emptyUse(){return {sick:0,personal:0,vacation:0,vq:[0,0,0,0]};}
+
+  function initYear(){
+    var ySel=$('quotaYear'); if(ySel.options.length) return;
+    var y0=(new Date().getFullYear())||2026;
+    for(var y=y0+1;y>=y0-2;y--){var o=document.createElement('option');o.value=y;o.textContent=(y+543)+' ('+y+')';ySel.appendChild(o);}
+    ySel.value=y0;
+  }
+
+  function render(by,scopeText){
+    var list=Object.keys(by).map(function(k){return by[k];}).sort(function(a,b){
+      var s=(b.use.personal+b.use.sick+b.use.vacation)-(a.use.personal+a.use.sick+a.use.vacation);
+      return s!==0?s:(a.name||'').localeCompare(b.name||'','th');
+    });
+    $('quotaSub').textContent=scopeText;
+    function qbar(used,quota){
+      var pct=Math.min(100,Math.round(used/quota*100)); var over=used>quota;
+      var col=over?'var(--absent)':(used>=quota*0.8?'var(--late)':'var(--present)');
+      return '<div class="qcell"><div class="qtop"><b class="'+(over?'over':'')+'">'+used+'</b>/'+quota+'</div>'+
+        '<div class="qtrack"><div class="qfill" style="width:'+pct+'%;background:'+col+'"></div></div>'+
+        '<div class="qrem'+(over?' over':'')+'">'+(over?('เกิน '+(used-quota)):('เหลือ '+(quota-used)))+' วัน</div></div>';
+    }
+    function vqChips(vq,lim){return '<div class="vq">'+vq.map(function(v,i){var o=v>lim;return '<span class="vqx'+(o?' over':'')+'">Q'+(i+1)+' '+v+'</span>';}).join('')+'</div>';}
+    var head='<table><thead><tr><th style="width:44px">#</th><th class="l">พนักงาน</th>'+
+      '<th>ลากิจ (4)</th><th>ลาป่วย (30)</th><th>พักร้อน (6) · รายไตรมาส</th><th>สถานะ</th></tr></thead><tbody>';
+    var body=list.map(function(e,i){
+      var u=e.use;
+      var pOver=u.personal>POLICY.personal.quota, sOver=u.sick>POLICY.sick.quota,
+          vYear=u.vacation>POLICY.vacation.quota, vQ=Math.max(u.vq[0],u.vq[1],u.vq[2],u.vq[3])>POLICY.vacation.perQuarter;
+      var flags=[]; if(pOver)flags.push('ลากิจเกินสิทธิ'); if(sOver)flags.push('ลาป่วยเกินสิทธิ');
+      if(vYear)flags.push('พักร้อนเกินสิทธิปี'); if(vQ)flags.push('พักร้อนเกินไตรมาส');
+      var badge=flags.length?'<span class="badge over" title="'+esc(flags.join(', '))+'">เกินสิทธิ ('+flags.length+')</span>':'<span class="badge ok">ปกติ</span>';
+      return '<tr><td class="idx num">'+(i+1)+'</td>'+
+        '<td class="who"><div class="nm">'+esc(e.name)+(e.nick?' <span class="nick">('+esc(e.nick)+')</span>':'')+'</div><div class="role">'+esc(e.pos||'—')+'</div></td>'+
+        '<td>'+qbar(u.personal,POLICY.personal.quota)+'</td>'+
+        '<td>'+qbar(u.sick,POLICY.sick.quota)+'</td>'+
+        '<td>'+qbar(u.vacation,POLICY.vacation.quota)+vqChips(u.vq,POLICY.vacation.perQuarter)+'</td>'+
+        '<td>'+badge+'</td></tr>';
+    }).join('');
+    var over=list.filter(function(e){var u=e.use;return u.personal>POLICY.personal.quota||u.sick>POLICY.sick.quota||u.vacation>POLICY.vacation.quota||Math.max(u.vq[0],u.vq[1],u.vq[2],u.vq[3])>POLICY.vacation.perQuarter;}).length;
+    $('quotaWrap').innerHTML=list.length?head+body+'</tbody></table>':'<div class="empty-state"><h3>ยังไม่มีรายการลา</h3><div>ปีนี้ยังไม่มีการลาป่วย/ลากิจ/พักร้อนในฐานข้อมูล</div></div>';
+    if(list.length && over) $('quotaSub').textContent+=' · ⚠ เกินสิทธิ '+over+' คน';
+  }
+
+  async function loadYear(){
+    var sb=getSB(); if(!sb){ say('ยังเชื่อมต่อฐานข้อมูลไม่ได้','err'); return; }
+    initYear(); var year=+$('quotaYear').value;
+    try{
+      try{ var pol=await sb.from('daiki_leave_policy').select('*');
+        if(!pol.error && pol.data) pol.data.forEach(function(r){ if(POLICY[r.status_key]){POLICY[r.status_key].quota=+r.days_per_year; if(r.per_quarter_limit!=null)POLICY[r.status_key].perQuarter=+r.per_quarter_limit;}});
+      }catch(_){}
+      say('กำลังโหลดสิทธิการลาปี '+year+'...','');
+      var start=year+'-01-01', end=(year+1)+'-01-01';
+      var r=await sb.from('daiki_attendance').select('work_date,status_key,daiki_employees(full_name,nickname,position)')
+        .in('status_key',['sick','personal','vacation']).gte('work_date',start).lt('work_date',end).limit(50000);
+      if(r.error) throw r.error;
+      var by={};
+      r.data.forEach(function(row){
+        var e=row.daiki_employees||{}; var nm=e.full_name||'(ไม่ระบุ)';
+        if(!by[nm]) by[nm]={name:nm,nick:e.nickname||'',pos:e.position||'',use:emptyUse()};
+        var u=by[nm].use; var q=Math.floor((+row.work_date.slice(5,7)-1)/3);
+        if(row.status_key==='sick')u.sick++; else if(row.status_key==='personal')u.personal++; else if(row.status_key==='vacation'){u.vacation++;u.vq[q]++;}
+      });
+      loadedYear=year;
+      render(by,'ทั้งปี '+(year+543)+' · จากฐานข้อมูล');
+      say('โหลดสำเร็จ ✓ '+Object.keys(by).length+' คน','ok');
+    }catch(e){ say('โหลดไม่สำเร็จ: '+(e.message||e),'err'); }
+  }
+
+  initYear();
+  $('quotaLoadDB').addEventListener('click',loadYear);
+  $('quotaYear').addEventListener('change',function(){ loadYear(); });
+  window.__leaveActivate=function(){ if(getSB() && loadedYear===null) loadYear(); };
+})();
+
+</script>
+<script>
+
+(function(){
+  var ROOT=document.getElementById('view-employees');
+  var $=function(id){return ROOT.querySelector('#'+id);};
+  function esc(s){return (''+(s==null?'':s)).replace(/[&<>\"]/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m];});}
+  function say(msg,cls){var el=$('empMsg');el.textContent=msg;el.className='dbmsg'+(cls?' '+cls:'');}
+  var SB=null; function getSB(){ if(!SB) SB=window.__getSB(); return SB; }
+  var LIST=[], loaded=false, editingId=null;
+
+  async function loadList(){
+    var sb=getSB(); if(!sb){ say('ยังเชื่อมต่อฐานข้อมูลไม่ได้','err'); return; }
+    say('กำลังโหลด...','');
+    try{
+      var r=await sb.from('daiki_employees').select('id,emp_code,full_name,nickname,position,start_date,day_off,is_active,resign_date,seq')
+        .order('seq',{ascending:true,nullsFirst:false}).order('full_name',{ascending:true}).limit(5000);
+      if(r.error) throw r.error;
+      LIST=r.data||[]; loaded=true; render(); say('โหลดสำเร็จ ✓ '+LIST.length+' คน','ok');
+    }catch(e){ say('โหลดไม่สำเร็จ: '+(e.message||e),'err'); }
+  }
+
+  function render(){
+    var q=($('empSearch').value||'').trim().toLowerCase();
+    var f=$('empFilter').value;
+    var rows=LIST.filter(function(e){
+      var active=(e.is_active!==false);
+      if(f==='active' && !active) return false;
+      if(f==='resigned' && active) return false;
+      if(q){ var hay=((e.full_name||'')+' '+(e.nickname||'')+' '+(e.emp_code||'')+' '+(e.position||'')).toLowerCase(); if(hay.indexOf(q)<0) return false; }
+      return true;
+    });
+    var nActive=LIST.filter(function(e){return e.is_active!==false;}).length;
+    var nOut=LIST.length-nActive;
+    $('empSub').textContent='ทั้งหมด '+LIST.length+' คน · ทำงานอยู่ '+nActive+' · ลาออกแล้ว '+nOut+' · แสดง '+rows.length;
+    var head='<table><thead><tr><th style=\"width:40px\">#</th><th>รหัส</th><th class=\"l\">ชื่อ-นามสกุล</th><th>ตำแหน่ง</th><th>เริ่มงาน</th><th>สถานะ</th><th style=\"width:210px\">จัดการ</th></tr></thead><tbody>';
+    var body=rows.map(function(e,i){
+      var active=(e.is_active!==false);
+      var pill=active?'<span class=\"pill on\">ทำงานอยู่</span>':'<span class=\"pill off\">ลาออก'+(e.resign_date?(' '+e.resign_date):'')+'</span>';
+      return '<tr>'+
+        '<td class=\"idx num\" style=\"color:var(--muted)\">'+(i+1)+'</td>'+
+        '<td class=\"num\">'+esc(e.emp_code||'—')+'</td>'+
+        '<td class=\"who\"><div class=\"nm\">'+esc(e.full_name)+(e.nickname?' <span class=\"nick\">('+esc(e.nickname)+')</span>':'')+'</div></td>'+
+        '<td>'+esc(e.position||'—')+'</td>'+
+        '<td class=\"num\">'+esc(e.start_date||'—')+'</td>'+
+        '<td>'+pill+'</td>'+
+        '<td><div class=\"act\">'+
+          '<button data-act=\"edit\" data-id=\"'+e.id+'\">แก้ไข</button>'+
+          (active?'<button class=\"resign\" data-act=\"resign\" data-id=\"'+e.id+'\">ลาออก</button>'
+                 :'<button class=\"restore\" data-act=\"restore\" data-id=\"'+e.id+'\">คืนสภาพ</button>')+
+          '<button class=\"del\" data-act=\"del\" data-id=\"'+e.id+'\">ลบ</button>'+
+        '</div></td></tr>';
+    }).join('');
+    $('empWrap').innerHTML = rows.length? head+body+'</tbody></table>'
+      : '<div class=\"empty-state\"><h3>ไม่พบพนักงาน</h3><div>ลองเปลี่ยนตัวกรองหรือคำค้นหา</div></div>';
+    $('empWrap').querySelectorAll('button[data-act]').forEach(function(b){
+      b.onclick=function(){ act(b.dataset.act, b.dataset.id); };
+    });
+  }
+
+  function byId(id){ for(var i=0;i<LIST.length;i++){ if(LIST[i].id===id) return LIST[i]; } return null; }
+
+  function showForm(emp){
+    editingId = emp? emp.id : null;
+    var e=emp||{};
+    var F=[
+      ['emp_code','รหัสพนักงาน',''],['full_name','ชื่อ-นามสกุล','req'],['nickname','ชื่อเล่น',''],
+      ['position','ตำแหน่ง',''],['start_date','วันเริ่มงาน','date'],['day_off','วันหยุดประจำ','']
+    ];
+    var fields=F.map(function(f){
+      var type=f[2]==='date'?'date':'text';
+      return '<div class=\"ef-f\"><label>'+f[1]+(f[2]==='req'?' <span class=\"req\">*</span>':'')+'</label>'+
+        '<input id=\"ef_'+f[0]+'\" type=\"'+type+'\" value=\"'+esc(e[f[0]]||'')+'\"></div>';
+    }).join('');
+    $('empForm').innerHTML='<h3>'+(emp?'แก้ไขข้อมูลพนักงาน':'เพิ่มพนักงานใหม่')+'</h3>'+
+      '<div class=\"ef-grid\">'+fields+'</div>'+
+      '<div class=\"ef-actions\"><button class=\"ebtn save\" id=\"efSave\">บันทึก</button><button class=\"ebtn\" id=\"efCancel\">ยกเลิก</button></div>';
+    $('empForm').style.display='block';
+    $('efSave').onclick=saveForm; $('efCancel').onclick=function(){ $('empForm').style.display='none'; };
+    $('ef_full_name').focus();
+  }
+
+  async function saveForm(){
+    var sb=getSB(); if(!sb) return;
+    function v(k){ var el=$('ef_'+k); var s=(el.value||'').trim(); return s===''?null:s; }
+    var name=v('full_name'); if(!name){ say('กรุณากรอกชื่อ-นามสกุล','err'); return; }
+    var rec={emp_code:v('emp_code'), full_name:name, nickname:v('nickname'), position:v('position'), start_date:v('start_date'), day_off:v('day_off')};
+    say('กำลังบันทึก...','');
+    try{
+      if(editingId){ var r=await sb.from('daiki_employees').update(rec).eq('id',editingId); if(r.error) throw r.error; }
+      else{
+        var maxSeq=LIST.reduce(function(m,e){ return Math.max(m, e.seq==null?0:e.seq); },0);
+        rec.seq=maxSeq+1; rec.is_active=true;
+        var r2=await sb.from('daiki_employees').insert(rec); if(r2.error) throw r2.error;
+      }
+      $('empForm').style.display='none';
+      await loadList(); say('บันทึกสำเร็จ ✓','ok');
+    }catch(e){ say('บันทึกไม่สำเร็จ: '+(e.message||e),'err'); }
+  }
+
+  async function act(a,id){
+    var sb=getSB(); if(!sb) return; var e=byId(id); if(!e) return;
+    if(a==='edit'){ showForm(e); return; }
+    try{
+      if(a==='resign'){
+        if(!confirm('ยืนยันให้ '+e.full_name+' ลาออก/พ้นสภาพ?\\n(ประวัติการมาทำงานจะยังเก็บไว้ แต่จะไม่แสดงในหน้ากรอก)')) return;
+        var today=new Date().toISOString().slice(0,10);
+        var r=await sb.from('daiki_employees').update({is_active:false, resign_date:today}).eq('id',id); if(r.error) throw r.error;
+        say(e.full_name+' → ลาออกแล้ว ('+today+')','ok');
+      } else if(a==='restore'){
+        var r2=await sb.from('daiki_employees').update({is_active:true, resign_date:null}).eq('id',id); if(r2.error) throw r2.error;
+        say(e.full_name+' → คืนสภาพแล้ว','ok');
+      } else if(a==='del'){
+        if(!confirm('⚠️ ลบ '+e.full_name+' ออกถาวร?\\nข้อมูลการมาทำงานทั้งหมดของคนนี้จะถูกลบด้วย กู้คืนไม่ได้!\\n\\nถ้าแค่ลาออก แนะนำใช้ปุ่ม \"ลาออก\" แทน')) return;
+        var r3=await sb.from('daiki_employees').delete().eq('id',id); if(r3.error) throw r3.error;
+        say('ลบ '+e.full_name+' แล้ว','ok');
+      }
+      await loadList();
+    }catch(err){ say('ทำรายการไม่สำเร็จ: '+(err.message||err),'err'); }
+  }
+
+  $('empAdd').addEventListener('click',function(){ showForm(null); });
+  $('empSearch').addEventListener('input',render);
+  $('empFilter').addEventListener('change',render);
+  window.__empActivate=function(){ if(getSB() && !loaded) loadList(); };
+})();
+
+</script>
+<script>
+(function(){
+  var views={grid:document.getElementById('view-grid'),dash:document.getElementById('view-dash'),leave:document.getElementById('view-leave'),employees:document.getElementById('view-employees')};
+  var tabs=document.querySelectorAll('.tab');
+  function show(name){
+    for(var k in views){ views[k].classList.toggle('active',k===name); }
+    tabs.forEach(function(t){ t.classList.toggle('active',t.dataset.tab===name); });
+    if(name==='dash' && window.__dashRefresh) window.__dashRefresh();
+    if(name==='grid' && window.__gridEnsure) window.__gridEnsure();
+    if(name==='leave' && window.__leaveActivate) window.__leaveActivate();
+    if(name==='employees' && window.__empActivate) window.__empActivate();
+    window.scrollTo(0,0);
+  }
+  tabs.forEach(function(t){ t.onclick=function(){ show(t.dataset.tab); }; });
+})();
+</script>
+</body>
+</html>
