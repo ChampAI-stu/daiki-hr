@@ -716,7 +716,9 @@ function ymFromSheet(name){
   if(!yr||!mo) return null;
   return yr+"-"+(mo<10?"0"+mo:mo);
 }
-// นำเข้า "ทุกเดือน" ของไดกิจากไฟล์ Excel ทีเดียว (clean replace รายเดือน)
+// นำเข้า "ทุกเดือน" ของไดกิจากไฟล์ Excel ทีเดียว
+function _sleep(ms){ return new Promise(function(r){ setTimeout(r,ms); }); }
+function _errText(e){ if(!e) return "unknown"; return (e.message||e.msg||JSON.stringify(e))+(e.details?" | "+e.details:"")+(e.hint?" | "+e.hint:"")+(e.code?" ["+e.code+"]":""); }
 async function importAllFromWB(){
   if(!WB){ dbSay("ยังไม่ได้อัปโหลดไฟล์","err"); return; }
   if(!SB && !connectDB()) return;
@@ -725,57 +727,63 @@ async function importAllFromWB(){
   names.forEach(function(n){ var ym=ymFromSheet(n); if(!ym) return;
     try{ var d=parseSheetToData(WB.Sheets[n], n); if(d.employees.length) sheets.push({ym:ym,name:n,d:d}); }catch(e){} });
   if(!sheets.length){ dbSay("ไม่พบชีต Daiki ที่มีข้อมูล (ชื่อชีตต้องมี Daiki + เดือน + ปี)","err"); return; }
-  sheets.sort(function(a,b){ return a.ym<b.ym?1:(a.ym>b.ym?-1:0); });   // ล่าสุดก่อน
+  sheets.sort(function(a,b){ return a.ym<b.ym?1:(a.ym>b.ym?-1:0); });
   var latestYM=sheets[0].ym;
   var latestNames={}; sheets[0].d.employees.forEach(function(e){ latestNames[e.name]=true; });
-  // 1) พนักงาน (dedup + seq + is_active ตามเดือนล่าสุด)
   var seen={}, empRows=[];
   sheets.forEach(function(s){ s.d.employees.forEach(function(e){
     if(seen[e.name]) return; seen[e.name]=true;
     empRows.push({emp_code:e.code||null, full_name:e.name, nickname:e.nick||null, position:e.pos||null, seq:empRows.length, is_active: !!latestNames[e.name]});
   }); });
+
+  window.__importing=true;   // ปิด realtime ระหว่างนำเข้า (กัน event ท่วม)
   try{
     dbSay("กำลังนำเข้าพนักงาน "+empRows.length+" คน...","");
     var up=await SB.from("daiki_employees").upsert(empRows,{onConflict:"full_name"}).select("id,full_name");
-    if(up.error) throw new Error("พนักงาน: "+up.error.message);
+    if(up.error) throw new Error("อัปเดตพนักงานไม่สำเร็จ: "+_errText(up.error));
     var idByName={}; up.data.forEach(function(r){ idByName[r.full_name]=r.id; });
 
-    // 2) การมาทำงาน แยกตามเดือน แล้ว "ลบเดือนนั้นทิ้งก่อน เขียนใหม่ทั้งเดือน"
-    var totalOK=0, totalErr=0, firstErr="";
-    for(var si=0; si<sheets.length; si++){
-      var s=sheets[si], ym=s.ym, y=+ym.slice(0,4), mo=+ym.slice(5,7);
-      var seenAtt={}, rows=[];
+    // รวมทุกเดือน + กัน (คน+วัน) ซ้ำ
+    var seenAtt={}, all=[];
+    sheets.forEach(function(s){ var y=+s.ym.slice(0,4), mo=+s.ym.slice(5,7);
       s.d.employees.forEach(function(e){ var eid=idByName[e.name]; if(!eid) return;
         e.cells.forEach(function(raw,i){ var k=classify(raw); if(k===""||k==="other") return;
           var day=s.d.days[i]; var dt=new Date(y,mo-1,day); if(dt.getMonth()!==mo-1) return;
-          var wd=ym+"-"+pad2(day); var key=eid+"|"+wd; if(seenAtt[key]) return; seenAtt[key]=true;
-          rows.push({employee_id:eid, work_date:wd, raw_code:(""+raw).trim(), status_key:k, source:"excel_import"});
+          var wd=s.ym+"-"+pad2(day); var key=eid+"|"+wd; if(seenAtt[key]) return; seenAtt[key]=true;
+          all.push({employee_id:eid, work_date:wd, raw_code:(""+raw).trim(), status_key:k, source:"excel_import"});
         });
       });
-      dbSay("["+(si+1)+"/"+sheets.length+"] เดือน "+ym+" — ล้างของเก่า...","");
-      var end=(mo===12?(y+1)+"-01":y+"-"+pad2(mo+1))+"-01";
-      var del=await SB.from("daiki_attendance").delete().gte("work_date",ym+"-01").lt("work_date",end);
-      if(del.error){ totalErr++; if(!firstErr)firstErr="ลบเดือน "+ym+": "+del.error.message; continue; }
-      for(var c=0;c<rows.length;c+=500){
-        dbSay("["+(si+1)+"/"+sheets.length+"] เดือน "+ym+" — เขียน "+Math.min(c+500,rows.length)+"/"+rows.length,"");
-        var r=await SB.from("daiki_attendance").insert(rows.slice(c,c+500));
-        if(r.error){ totalErr++; if(!firstErr)firstErr="เดือน "+ym+": "+r.error.message; break; }
-        totalOK+=Math.min(500,rows.length-c);
+    });
+
+    var CH=500, done=0, failMsg="";
+    for(var c=0;c<all.length;c+=CH){
+      var chunk=all.slice(c,c+CH);
+      var okChunk=false, lastErr=null;
+      for(var attempt=0; attempt<3 && !okChunk; attempt++){
+        if(attempt>0) await _sleep(500*attempt);          // backoff
+        var r=await SB.from("daiki_attendance").upsert(chunk,{onConflict:"employee_id,work_date"});
+        if(r.error){ lastErr=r.error; } else { okChunk=true; }
       }
+      if(!okChunk){ failMsg=_errText(lastErr); break; }    // หยุดพร้อมเหตุผล
+      done+=chunk.length;
+      dbSay("กำลังนำเข้า "+done+"/"+all.length+" รายการ...","");
+      await _sleep(120);                                    // หน่วงกันชนกัน
     }
-    // 3) ตรวจนับเดือนล่าสุดใน DB จริง
+
+    // ตรวจนับเดือนล่าสุดจริงใน DB
     var y2=+latestYM.slice(0,4), m2=+latestYM.slice(5,7);
     var end2=(m2===12?(y2+1)+"-01":y2+"-"+pad2(m2+1))+"-01";
     var chk=await SB.from("daiki_attendance").select("id",{count:"exact",head:true}).gte("work_date",latestYM+"-01").lt("work_date",end2);
     var cnt=(chk&&chk.count!=null)?chk.count:"?";
-    if(totalErr){
-      var msg="นำเข้าไม่ครบ! เขียนได้ "+totalOK+" แถว · พลาด "+totalErr+" จุด\\nสาเหตุแรก: "+firstErr+"\\n\\n(มักเกิดจากยังไม่ได้รัน SQL migrate ครบ)";
-      dbSay("นำเข้าไม่ครบ: "+firstErr,"err"); alert(msg);
+
+    if(failMsg){
+      dbSay("นำเข้าไม่ครบ ("+done+"/"+all.length+"): "+failMsg,"err");
+      alert("นำเข้าไม่ครบ!\\nเขียนได้ "+done+" จาก "+all.length+" แถว\\n\\nError จริงจาก DB:\\n"+failMsg+"\\n\\n(ก๊อปข้อความนี้ส่งให้ผู้พัฒนา)");
     } else {
-      dbSay("นำเข้าครบ ✓ "+sheets.length+" เดือน · พนักงาน "+empRows.length+" คน · เขียน "+totalOK+" แถว · เดือน "+latestYM+" ใน DB = "+cnt+" รายการ","ok");
+      dbSay("นำเข้าครบ ✓ "+sheets.length+" เดือน · พนักงาน "+empRows.length+" คน · "+done+" รายการ · เดือน "+latestYM+" ใน DB = "+cnt,"ok");
     }
-    window.__setMonth(latestYM);
-  }catch(e){ dbSay("นำเข้าไม่สำเร็จ: "+(e.message||e),"err"); alert("นำเข้าไม่สำเร็จ:\\n"+(e.message||e)+"\\n\\nตรวจว่ารัน SQL ครบทุกไฟล์แล้วหรือยัง"); }
+  }catch(e){ dbSay("นำเข้าไม่สำเร็จ: "+_errText(e),"err"); alert("นำเข้าไม่สำเร็จ:\\n"+_errText(e)); }
+  finally{ window.__importing=false; window.__setMonth(latestYM); }   // เปิด realtime + โหลดเดือนล่าสุด
 }
 
 async function importToDB(){
@@ -829,6 +837,7 @@ var dashChannel=null, dashRT=null;
 function subscribeDash(){
   if(!SB || dashChannel) return;
   dashChannel=SB.channel("daiki_dash").on("postgres_changes",{event:"*",schema:"public",table:"daiki_attendance"},function(payload){
+    if(window.__importing) return;
     var rec=payload.new||payload.old; if(!rec||!rec.work_date) return;
     if(rec.work_date.slice(0,7)!==(window.__ym||"")) return;   // เฉพาะเดือนที่กำลังดู
     if(dashRT) clearTimeout(dashRT);
@@ -1181,6 +1190,7 @@ function subscribeRealtime(){
   if(channel){ SB.removeChannel(channel); channel=null; }
   channel=SB.channel("daiki_grid_"+Y+"_"+M)
     .on("postgres_changes",{event:"*",schema:"public",table:"daiki_attendance"},function(payload){
+      if(window.__importing) return;
       var rec=payload.new||payload.old; if(!rec||!rec.work_date) return;
       if(rec.work_date.slice(0,7)!==(Y+"-"+p2(M+1))) return;          // เฉพาะเดือนนี้
       var key=rec.employee_id+"|"+rec.work_date;
