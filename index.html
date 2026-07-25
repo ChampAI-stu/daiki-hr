@@ -711,7 +711,14 @@ function connectDB(){
 // นำเข้าข้อมูลที่กำลังแสดงอยู่ (จาก Excel/demo) ขึ้น Supabase
 async function importToDB(){
   if(!SB && !connectDB()) return;
-  var d=DATA; if(!d||!d.employees.length){ dbSay("ไม่มีข้อมูลให้นำเข้า","err"); return; }
+  // อ่านจากไฟล์ Excel ที่เลือก "โดยตรง" ไม่ผูกกับสิ่งที่แสดงอยู่ (กันเดี๋ยวขึ้นเดี๋ยวไม่ขึ้น)
+  var d;
+  if(WB){
+    try{ d=parseSheetToData(WB.Sheets[$("sheetSel").value], $("sheetSel").value); d.meta=monthMeta(d.asOf,d.days); }
+    catch(err){ dbSay("อ่านชีต Excel ไม่สำเร็จ: "+(err.message||err),"err"); return; }
+  } else { d=DATA; }   // ไม่ได้อัปโหลด = ใช้ข้อมูลตัวอย่าง
+  if(!d||!d.employees.length){ dbSay("ไม่มีข้อมูลให้นำเข้า — อัปโหลดไฟล์ Excel ก่อน","err"); return; }
+  var impYM=d.meta.y+"-"+pad2(d.meta.m+1);
   try{
     dbSay("กำลังนำเข้าพนักงาน...","");
     // 1) upsert พนักงาน (key = full_name) — กันชื่อซ้ำในไฟล์ (Postgres upsert ห้าม key ซ้ำในคำสั่งเดียว)
@@ -743,7 +750,8 @@ async function importToDB(){
       var r=await SB.from("daiki_attendance").upsert(chunk,{onConflict:"employee_id,work_date"});
       if(r.error) throw r.error;
     }
-    dbSay("นำเข้าสำเร็จ ✓ พนักงาน "+empRows.length+" คน · การมาทำงาน "+attRows.length+" รายการ ("+ymOfData()+")","ok");
+    dbSay("นำเข้าสำเร็จ ✓ พนักงาน "+empRows.length+" คน · การมาทำงาน "+attRows.length+" รายการ ("+impYM+")","ok");
+    $("dbMonth").value=impYM; await loadFromDB();   // เด้งไปโชว์เดือนที่เพิ่งนำเข้าเลย
   }catch(e){ dbSay("นำเข้าไม่สำเร็จ: "+(e.message||e),"err"); }
 }
 
