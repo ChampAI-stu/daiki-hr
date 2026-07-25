@@ -776,8 +776,16 @@ window.__commitStaged=async function(){
   try{
     dbSay("กำลังบันทึกพนักงาน "+st.roster.length+" คน...","");
     var up=await SB.from("daiki_employees").upsert(st.roster,{onConflict:"full_name"}).select("id,full_name");
-    if(up.error) throw new Error("พนักงาน: "+_errText(up.error));
+    if(up.error){
+      // เผื่อยังไม่ได้รัน migrate (คอลัมน์ seq/is_active ไม่มี) → ลองใหม่แบบใส่เฉพาะคอลัมน์พื้นฐาน
+      console.error("employee upsert error (full):", up.error);
+      var minimal=st.roster.map(function(e){ return {emp_code:e.emp_code, full_name:e.full_name, nickname:e.nickname, position:e.position}; });
+      up=await SB.from("daiki_employees").upsert(minimal,{onConflict:"full_name"}).select("id,full_name");
+      if(up.error) throw new Error("บันทึกพนักงานไม่สำเร็จ: "+_errText(up.error));
+      dbSay("⚠ บันทึกพนักงานแบบพื้นฐาน (ยังไม่ได้รัน migrate seq) — ลำดับ/สถานะลาออกอาจไม่ครบ","");
+    }
     var idByName={}; up.data.forEach(function(r){ idByName[r.full_name]=r.id; });
+    if(!Object.keys(idByName).length) throw new Error("ไม่ได้ id พนักงานกลับมา (ตรวจ RLS/สิทธิ์ SELECT)");
 
     // เขียน "ทีละเดือน" เป็นก้อนเดียว/เดือน (ลดจำนวน request + กันชนกัน)
     var yms=Object.keys(st.byMonth).sort(); // เก่า->ใหม่
@@ -802,7 +810,7 @@ window.__commitStaged=async function(){
           if(r.error){ err2=r.error; } else { wrote=true; } }
         if(!wrote){ ok=false; le=err2; } else { totalDone+=batches[bi].length; }
       }
-      if(!ok){ failMsg=_errText(le); failYM=ym; break; }
+      if(!ok){ failMsg=_errText(le); failYM=ym; console.error("attendance upsert fail month",ym,le); break; }
       await _sleep(150);
     }
 
