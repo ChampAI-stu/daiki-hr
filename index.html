@@ -237,13 +237,11 @@
 
 <div class="dbbar">
   <div class="dbbar-in">
-    <span class="dblab">ฐานข้อมูล</span>
+    <span class="dblab">ฐานข้อมูล · Realtime</span>
     <input class="url" id="dbUrl" placeholder="Supabase URL (https://xxx.supabase.co)">
     <input class="key" id="dbKey" type="password" placeholder="anon key">
     <button class="dbbtn go" id="dbConnect">เชื่อมต่อ</button>
     <input class="mon" id="dbMonth" type="month">
-    <button class="dbbtn load" id="dbLoad">โหลดจาก DB</button>
-    <button class="dbbtn" id="dbImport">นำเข้าข้อมูลปัจจุบันขึ้น DB</button>
     <span class="demo-tag on" id="demoTag">ข้อมูลตัวอย่าง</span>
     <div class="select-wrap"><select id="sheetSel"><option>Daiki July 2026</option></select></div>
     <label class="btn btn-upload" for="fileIn">อัปโหลดไฟล์ Excel</label>
@@ -653,7 +651,7 @@ document.getElementById("fileIn").addEventListener("change",function(ev){
       var choose=pref.length?pref[pref.length-1]:names[names.length-1];
       sel.value=choose;
       document.getElementById("demoTag").classList.remove("on");
-      loadSelectedSheet();
+      importToDB();   // อัปโหลด = อ่าน+เขียนเข้า DB อัตโนมัติ แล้วโชว์เลย
     }catch(err){ alert("อ่านไฟล์ไม่สำเร็จ: "+err.message); }
   };
   rd.readAsArrayBuffer(f);
@@ -667,7 +665,7 @@ function loadSelectedSheet(){
     loadData(d);
   }catch(err){ alert("ชีต \""+name+"\": "+err.message); }
 }
-document.getElementById("sheetSel").addEventListener("change",function(){ if(WB) loadSelectedSheet(); });
+document.getElementById("sheetSel").addEventListener("change",function(){ if(WB) importToDB(); });
 
 // ------- export -------
 document.getElementById("exportBtn").addEventListener("click",function(){
@@ -755,6 +753,18 @@ async function importToDB(){
   }catch(e){ dbSay("นำเข้าไม่สำเร็จ: "+(e.message||e),"err"); }
 }
 
+// realtime: กรอกใน grid/แก้ที่ไหน แดชบอร์ดอัปเดตเอง
+var dashChannel=null, dashRT=null;
+function subscribeDash(){
+  if(!SB || dashChannel) return;
+  dashChannel=SB.channel("daiki_dash").on("postgres_changes",{event:"*",schema:"public",table:"daiki_attendance"},function(payload){
+    var rec=payload.new||payload.old; if(!rec||!rec.work_date) return;
+    if(rec.work_date.slice(0,7)!==($("dbMonth").value||"")) return;   // เฉพาะเดือนที่กำลังดู
+    if(dashRT) clearTimeout(dashRT);
+    dashRT=setTimeout(function(){ loadFromDB(); }, 500);              // debounce รวมหลายการแก้
+  }).subscribe();
+}
+
 // โหลดข้อมูลเดือนที่เลือกจาก Supabase มาแสดง
 var dashReq=0;
 async function loadFromDB(){
@@ -802,8 +812,6 @@ async function loadFromDB(){
 function statusToRaw(k){ var s=KEYMAP[k]; return s? s.codes[0]:""; }
 
 $("dbConnect").addEventListener("click",connectDB);
-$("dbImport").addEventListener("click",importToDB);
-$("dbLoad").addEventListener("click",loadFromDB);
 $("dbMonth").addEventListener("change",loadFromDB);
 
 // ------- init with demo -------
