@@ -753,36 +753,60 @@ function stageFromWB(){
   dbSay("โหลดจากไฟล์แล้ว "+sheets.length+" เดือน · "+total+" รายการ — ยังไม่บันทึก กด 💾 บันทึก","ok");
 }
 
-// บันทึกทุกอย่างที่ staged ลง DB ครั้งเดียว (global — เรียกจากปุ่มบนแถบเมนู)
+// บันทึกทุกอย่างที่ staged ลง DB (global — ปุ่มบนแถบเมนู)
 window.__commitStaged=async function(){
   var st=window.__staged; if(!st){ dbSay("ไม่มีข้อมูลรอบันทึก (อัปโหลดไฟล์ก่อน)","err"); return; }
   if(!SB && !connectDB()) return;
   window.__importing=true;
+  if(SB && SB.removeAllChannels){ try{ SB.removeAllChannels(); }catch(e){} }   // ตัด realtime ทิ้งจริง ๆ ระหว่างเขียน
+  dashChannel=null;
   var btn=document.getElementById("btnSave"); if(btn) btn.disabled=true;
   try{
     dbSay("กำลังบันทึกพนักงาน "+st.roster.length+" คน...","");
     var up=await SB.from("daiki_employees").upsert(st.roster,{onConflict:"full_name"}).select("id,full_name");
     if(up.error) throw new Error("พนักงาน: "+_errText(up.error));
     var idByName={}; up.data.forEach(function(r){ idByName[r.full_name]=r.id; });
-    var seenAtt={}, all=[];
-    Object.keys(st.byMonth).forEach(function(ym){ var y=+ym.slice(0,4), mo=+ym.slice(5,7); var mn=st.byMonth[ym];
+
+    // เขียน "ทีละเดือน" เป็นก้อนเดียว/เดือน (ลดจำนวน request + กันชนกัน)
+    var yms=Object.keys(st.byMonth).sort(); // เก่า->ใหม่
+    var totalDone=0, failMsg="", failYM="";
+    for(var mi=0; mi<yms.length; mi++){
+      var ym=yms[mi], y=+ym.slice(0,4), mo=+ym.slice(5,7), mn=st.byMonth[ym];
+      var seenAtt={}, rows=[];
       mn.employees.forEach(function(e){ var eid=idByName[e.name]; if(!eid) return;
         e.cells.forEach(function(raw,i){ var k=classify(raw); if(k===""||k==="other") return;
           var day=mn.days[i]; var dt=new Date(y,mo-1,day); if(dt.getMonth()!==mo-1) return;
           var wd=ym+"-"+pad2(day); var key=eid+"|"+wd; if(seenAtt[key]) return; seenAtt[key]=true;
-          all.push({employee_id:eid, work_date:wd, raw_code:(""+raw).trim(), status_key:k, source:"excel_import"}); }); }); });
-    var CH=500, done=0, failMsg="";
-    for(var c=0;c<all.length;c+=CH){ var chunk=all.slice(c,c+CH); var ok=false, le=null;
-      for(var a=0;a<3 && !ok;a++){ if(a>0) await _sleep(500*a);
-        var r=await SB.from("daiki_attendance").upsert(chunk,{onConflict:"employee_id,work_date"});
-        if(r.error){ le=r.error; } else { ok=true; } }
-      if(!ok){ failMsg=_errText(le); break; }
-      done+=chunk.length; dbSay("กำลังบันทึก "+done+"/"+all.length+" รายการ...",""); await _sleep(100);
+          rows.push({employee_id:eid, work_date:wd, raw_code:(""+raw).trim(), status_key:k, source:"excel_import"}); }); });
+      dbSay("["+(mi+1)+"/"+yms.length+"] กำลังบันทึกเดือน "+ym+" ("+rows.length+" แถว)...","");
+      // upsert ทั้งเดือนในครั้งเดียว (retry 3 ครั้ง); ถ้าเดือนใหญ่มากค่อยซอย 1000
+      var ok=false, le=null;
+      var batches=[]; if(rows.length<=1500){ batches=[rows]; } else { for(var b=0;b<rows.length;b+=1000) batches.push(rows.slice(b,b+1000)); }
+      ok=true;
+      for(var bi=0; bi<batches.length && ok; bi++){
+        var wrote=false, err2=null;
+        for(var a=0;a<3 && !wrote;a++){ if(a>0) await _sleep(600*a);
+          var r=await SB.from("daiki_attendance").upsert(batches[bi],{onConflict:"employee_id,work_date"});
+          if(r.error){ err2=r.error; } else { wrote=true; } }
+        if(!wrote){ ok=false; le=err2; } else { totalDone+=batches[bi].length; }
+      }
+      if(!ok){ failMsg=_errText(le); failYM=ym; break; }
+      await _sleep(150);
     }
-    if(failMsg){ dbSay("บันทึกไม่ครบ ("+done+"/"+all.length+"): "+failMsg,"err"); alert("บันทึกไม่ครบ!\\nเขียนได้ "+done+" จาก "+all.length+" แถว\\n\\nError จริงจาก DB:\\n"+failMsg); }
-    else { window.__staged=null; if(window.__updateSaveUI) window.__updateSaveUI(); dbSay("บันทึกครบ ✓ "+st.monthsCount+" เดือน · พนักงาน "+st.roster.length+" คน · "+done+" รายการ","ok"); }
+
+    if(failMsg){
+      dbSay("บันทึกไม่ครบ (หยุดที่เดือน "+failYM+", เขียนไปแล้ว "+totalDone+" แถว): "+failMsg,"err");
+      alert("บันทึกไม่ครบ!\\nหยุดที่เดือน "+failYM+" · เขียนไปแล้ว "+totalDone+" แถว\\n\\nError จริงจาก DB:\\n"+failMsg+"\\n\\n(ก๊อปข้อความนี้ส่งให้ผู้พัฒนา)");
+    } else {
+      window.__staged=null; if(window.__updateSaveUI) window.__updateSaveUI();
+      dbSay("บันทึกครบ ✓ "+st.monthsCount+" เดือน · พนักงาน "+st.roster.length+" คน · "+totalDone+" รายการ","ok");
+    }
   }catch(e){ dbSay("บันทึกไม่สำเร็จ: "+_errText(e),"err"); alert("บันทึกไม่สำเร็จ:\\n"+_errText(e)); }
-  finally{ window.__importing=false; if(btn) btn.disabled=false; window.__setMonth(window.__ym); }
+  finally{
+    window.__importing=false; if(btn) btn.disabled=false;
+    dashChannel=null; if(typeof subscribeDash==="function") subscribeDash();   // ต่อ realtime กลับ
+    window.__setMonth(window.__ym);                                             // โหลดใหม่จาก DB
+  }
 };
 
 async function importToDB(){
