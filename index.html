@@ -243,7 +243,6 @@
     <input class="key" id="dbKey" type="password" placeholder="anon key">
     <button class="dbbtn go" id="dbConnect">เชื่อมต่อ</button>
     <span class="demo-tag on" id="demoTag">ข้อมูลตัวอย่าง</span>
-    <div class="select-wrap"><select id="sheetSel"><option>Daiki July 2026</option></select></div>
     <label class="btn btn-upload" for="fileIn">อัปโหลดไฟล์ Excel</label>
     <input type="file" id="fileIn" accept=".xlsx,.xls">
     <span class="dbmsg" id="dbMsg">ยังไม่ได้เชื่อมต่อ — กรอก URL + anon key แล้วกด "เชื่อมต่อ"</span>
@@ -647,17 +646,9 @@ document.getElementById("fileIn").addEventListener("change",function(ev){
   rd.onload=function(e){
     try{
       WB=XLSX.read(new Uint8Array(e.target.result),{type:"array",cellDates:false});
-      var sel=document.getElementById("sheetSel");
-      // prefer sheets starting with Daiki, else all
-      var names=WB.SheetNames;
-      sel.innerHTML=names.map(function(n){return '<option>'+esc(n)+'</option>';}).join("");
-      // pick a Daiki sheet if present
-      var pref=names.filter(function(n){return /daiki/i.test(n);});
-      var choose=pref.length?pref[pref.length-1]:names[names.length-1];
-      sel.value=choose;
-      document.getElementById("demoTag").classList.remove("on");
-      importToDB();   // อัปโหลด = อ่าน+เขียนเข้า DB อัตโนมัติ แล้วโชว์เลย
-    }catch(err){ alert("อ่านไฟล์ไม่สำเร็จ: "+err.message); }
+      var dt=document.getElementById("demoTag"); if(dt) dt.classList.remove("on");
+      importAllFromWB();
+    }catch(err){ dbSay("อ่านไฟล์ไม่สำเร็จ: "+(err.message||err),"err"); }
   };
   rd.readAsArrayBuffer(f);
 });
@@ -670,7 +661,6 @@ function loadSelectedSheet(){
     loadData(d);
   }catch(err){ alert("ชีต \""+name+"\": "+err.message); }
 }
-document.getElementById("sheetSel").addEventListener("change",function(){ if(WB) importToDB(); });
 
 // ------- export -------
 document.getElementById("exportBtn").addEventListener("click",function(){
@@ -712,6 +702,59 @@ function connectDB(){
 }
 
 // นำเข้าข้อมูลที่กำลังแสดงอยู่ (จาก Excel/demo) ขึ้น Supabase
+
+function ymFromSheet(name){
+  var MON={january:1,jan:1,february:2,feb:2,march:3,mar:3,april:4,apr:4,may:5,june:6,jun:6,july:7,jul:7,august:8,aug:8,september:9,sept:9,sep:9,october:10,oct:10,november:11,nov:11,december:12,dec:12};
+  var s=name.toLowerCase(); var ym=name.match(/(19|20)\d{2}/); var yr=ym?+ym[0]:null; var mo=null;
+  for(var k in MON){ if(new RegExp("\\b"+k+"\\b").test(s)){ mo=MON[k]; break; } }
+  if(!yr||!mo) return null;
+  return yr+"-"+(mo<10?"0"+mo:mo);
+}
+// นำเข้า "ทุกเดือน" ของไดกิจากไฟล์ Excel ทีเดียว
+async function importAllFromWB(){
+  if(!WB){ dbSay("ยังไม่ได้อัปโหลดไฟล์","err"); return; }
+  if(!SB && !connectDB()) return;
+  var names=WB.SheetNames.filter(function(n){ return /daiki/i.test(n); });
+  var sheets=[];
+  names.forEach(function(n){ var ym=ymFromSheet(n); if(!ym) return;
+    try{ var d=parseSheetToData(WB.Sheets[n], n); if(d.employees.length) sheets.push({ym:ym,name:n,d:d}); }catch(e){} });
+  if(!sheets.length){ dbSay("ไม่พบชีต Daiki ที่มีข้อมูล (ชื่อชีตต้องมีคำว่า Daiki + เดือน + ปี)","err"); return; }
+  sheets.sort(function(a,b){ return a.ym<b.ym?1:(a.ym>b.ym?-1:0); });   // ล่าสุดก่อน
+  var latestYM=sheets[0].ym;
+  var latestNames={}; sheets[0].d.employees.forEach(function(e){ latestNames[e.name]=true; });
+  // พนักงาน: dedup + seq (ยึดเดือนล่าสุด) + คนที่ไม่อยู่เดือนล่าสุด = ลาออก
+  var seen={}, empRows=[];
+  sheets.forEach(function(s){ s.d.employees.forEach(function(e){
+    if(seen[e.name]) return; seen[e.name]=true;
+    empRows.push({emp_code:e.code||null, full_name:e.name, nickname:e.nick||null, position:e.pos||null, seq:empRows.length, is_active: !!latestNames[e.name]});
+  }); });
+  try{
+    dbSay("กำลังนำเข้าพนักงาน "+empRows.length+" คน...","");
+    var up=await SB.from("daiki_employees").upsert(empRows,{onConflict:"full_name"}).select("id,full_name");
+    if(up.error) throw up.error;
+    var idByName={}; up.data.forEach(function(r){ idByName[r.full_name]=r.id; });
+    // การมาทำงานทุกเดือน (กันวันที่ไม่ถูกต้องของเดือนนั้น)
+    var seenAtt={}, attRows=[];
+    sheets.forEach(function(s){ var y=+s.ym.slice(0,4), mo=+s.ym.slice(5,7);
+      s.d.employees.forEach(function(e){ var eid=idByName[e.name]; if(!eid) return;
+        e.cells.forEach(function(raw,i){ var k=classify(raw); if(k===""||k==="other") return;
+          var day=s.d.days[i]; var dt=new Date(y,mo-1,day); if(dt.getMonth()!==mo-1) return;   // ข้ามวันที่เกินเดือน
+          var wd=s.ym+"-"+pad2(day); var key=eid+"|"+wd; if(seenAtt[key]) return; seenAtt[key]=true;
+          attRows.push({employee_id:eid, work_date:wd, raw_code:(""+raw).trim(), status_key:k, source:"excel_import"});
+        });
+      });
+    });
+    var CH=1000;
+    for(var s2=0;s2<attRows.length;s2+=CH){
+      dbSay("กำลังนำเข้าการมาทำงาน "+Math.min(s2+CH,attRows.length)+"/"+attRows.length+" ...","");
+      var r=await SB.from("daiki_attendance").upsert(attRows.slice(s2,s2+CH),{onConflict:"employee_id,work_date"});
+      if(r.error) throw r.error;
+    }
+    dbSay("นำเข้าครบ ✓ "+sheets.length+" เดือน · พนักงาน "+empRows.length+" คน ("+empRows.filter(function(e){return e.is_active;}).length+" ทำงานอยู่) · "+attRows.length+" รายการ","ok");
+    window.__setMonth(latestYM);   // ตั้งเดือนกลางเป็นเดือนล่าสุด → ทุกแท็บเด้งตาม
+  }catch(e){ dbSay("นำเข้าไม่สำเร็จ: "+(e.message||e),"err"); }
+}
+
 async function importToDB(){
   if(!SB && !connectDB()) return;
   // อ่านจากไฟล์ Excel ที่เลือก "โดยตรง" ไม่ผูกกับสิ่งที่แสดงอยู่ (กันเดี๋ยวขึ้นเดี๋ยวไม่ขึ้น)
