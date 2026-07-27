@@ -997,7 +997,6 @@ var brush="present";
 var paidMode="paid";   // ได้ตัง/ไม่ได้ตัง สำหรับแปรงลาป่วย/ลากิจ
 var leaveHours=8;      // ชั่วโมงที่ลา (1 วัน = 8 ชม.)
 var SB=null, LIVE=false, channel=null;
-var saveQueue={}, recentLocal={}, flushTimer=null;
 
 function daysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
 function ymd(day){ return Y+"-"+p2(M+1)+"-"+p2(day); }
@@ -1239,7 +1238,7 @@ async function loadMonth(){
     var byId={}; EMP.forEach(function(e,i){ byId[e.dbId]=i; }); EMP._byId=byId;
     dbSay("กำลังโหลดข้อมูลเดือน "+mv+"...","");
     var start=Y+"-"+p2(M+1)+"-01", end=(M===11?(Y+1)+"-01":Y+"-"+p2(M+2))+"-01";
-    var ardata=await window.__pageAll(function(f,t){ return SB.from("daiki_attendance").select("employee_id,work_date,raw_code,status_key,note,is_paid").gte("work_date",start).lt("work_date",end).order("employee_id",{ascending:true}).order("work_date",{ascending:true}).range(f,t); });
+    var ardata=await window.__pageAll(function(f,t){ return SB.from("daiki_attendance").select("employee_id,work_date,raw_code,status_key,note,is_paid,hours").gte("work_date",start).lt("work_date",end).order("employee_id",{ascending:true}).order("work_date",{ascending:true}).range(f,t); });
     ardata.forEach(function(row){ var i=byId[row.employee_id]; if(i==null)return; var day=+row.work_date.slice(8,10);
       if(row.status_key){ EMP[i].cells[day]=row.raw_code||(KEYMAP[row.status_key]?KEYMAP[row.status_key].code:""); }
       if(row.note){ EMP[i].notes[day]=row.note; }
