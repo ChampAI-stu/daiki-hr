@@ -1119,8 +1119,10 @@ function applyBrush(idx,day){
   var unpaid=isLeave && paidMode==="unpaid";
   var paid=erase?undefined:(isLeave?(unpaid?false:true):undefined);   // true/false/undefined
   var cur=e.cells[day]||"";
+  var curHrs=(e.hours&&e.hours[day])||null;
+  var tgtHrs=(isLeave && leaveHours && leaveHours<8)?leaveHours:null;
   if(erase){ if(cur==="" && e.paid[day]===undefined && e.notes[day]==null) return; }
-  else if(cur===code && (e.paid[day]===false)===(paid===false)) return;
+  else if(cur===code && (e.paid[day]===false)===(paid===false) && curHrs===tgtHrs) return;
   if(erase){ delete e.cells[day]; delete e.paid[day]; delete e.notes[day]; delete e.hours[day]; }   // ล้างโน๊ต+ชม.ด้วย
   else{ e.cells[day]=code; if(paid===false) e.paid[day]=false; else delete e.paid[day];
         if(isLeave && leaveHours && leaveHours<8) e.hours[day]=leaveHours; else delete e.hours[day]; }
@@ -1175,9 +1177,22 @@ window.__saveGrid=async function(){
     else{ ups.push({employee_id:e.dbId,work_date:wd,raw_code:code||null,status_key:code?classify(code):null,is_paid:paid,note:note,hours:hrs,source:"grid"}); }
   });
   try{ setSave("saving","กำลังบันทึก...");
-    for(var i=0;i<ups.length;i+=500){ var r=await SB.from("daiki_attendance").upsert(ups.slice(i,i+500),{onConflict:"employee_id,work_date"}); if(r.error) throw r.error; }
+    var hoursWarn=false;
+    for(var i=0;i<ups.length;i+=500){ var chunk=ups.slice(i,i+500);
+      var r=await SB.from("daiki_attendance").upsert(chunk,{onConflict:"employee_id,work_date"});
+      if(r.error){
+        // เผื่อยังไม่มีคอลัมน์ hours (ยังไม่รัน migrate4) → ลองใหม่แบบไม่ใส่ hours
+        var chunk2=chunk.map(function(x){ var y={}; for(var kk in x) if(kk!=="hours") y[kk]=x[kk]; return y; });
+        var r2=await SB.from("daiki_attendance").upsert(chunk2,{onConflict:"employee_id,work_date"});
+        if(r2.error) throw r2.error;
+        hoursWarn=true;
+      }
+    }
     for(var j=0;j<dels.length;j++){ var dr=await SB.from("daiki_attendance").delete().match(dels[j]); if(dr.error) throw dr.error; }
-    dirty={}; updateDirtyUI(); setSave("saved","บันทึกแล้ว ✓"); return true;
+    dirty={}; updateDirtyUI();
+    if(hoursWarn){ setSave("err","บันทึกแล้ว แต่ยังเก็บชั่วโมงไม่ได้ — ต้องรัน daiki_migrate4.sql"); alert("บันทึกข้อมูลแล้ว ✓ แต่ยังเก็บชั่วโมงลาไม่ได้ เพราะยังไม่ได้รัน daiki_migrate4.sql ใน Supabase — รัน SQL นั้นก่อน แล้วบันทึกใหม่ ชั่วโมงจะถูกเก็บ"); }
+    else { setSave("saved","บันทึกแล้ว ✓"); }
+    return true;
   }catch(e){ setSave("err","บันทึกไม่สำเร็จ: "+(e.message||e)); alert("บันทึกไม่สำเร็จ: "+(e.message||e)); return false; }
 };
 // ---------- add employee ----------
