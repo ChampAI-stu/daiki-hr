@@ -1288,7 +1288,7 @@ window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
       var col=over?'var(--absent)':(used>=quota*0.8?'var(--late)':'var(--present)');
       return '<div class="qcell"><div class="qtop"><b class="'+(over?'over':'')+'">'+used+'</b>/'+quota+'</div>'+
         '<div class="qtrack"><div class="qfill" style="width:'+pct+'%;background:'+col+'"></div></div>'+
-        '<div class="qrem'+(over?' over':'')+'">'+(over?('เกิน '+(used-quota)):('เหลือ '+(quota-used)))+' ชม.</div></div>';
+        '<div class="qrem'+(over?' over':'')+'">'+(over?('เกิน '+(used-quota)):('เหลือ '+(quota-used)))+' วัน</div></div>';
     }
     function vqChips(vq,lim){return '<div class="vq">'+vq.map(function(v,i){var o=v>lim;return '<span class="vqx'+(o?' over':'')+'">Q'+(i+1)+' '+v+'</span>';}).join('')+'</div>';}
     var head='<table><thead><tr><th style="width:44px">#</th><th class="l">พนักงาน</th>'+
