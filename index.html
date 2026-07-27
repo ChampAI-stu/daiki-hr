@@ -1062,7 +1062,10 @@ function renderGrid(){
       var raw=e.cells[d]||""; var k=classify(raw); var dow=new Date(Y,M,d).getDay(); var wk=(dow===0||dow===6);
       var cls=(k&&k!=="other")?k:(wk?"wknd":"");
       var nt=e.notes&&e.notes[d]?e.notes[d]:"";
-      body+='<td class="cell '+cls+(nt?" has-note":"")+'" id="c_'+idx+'_'+d+'" data-i="'+idx+'" data-d="'+d+'"'+(nt?' title="📝 '+esc(nt)+'"':'')+'>'+(raw==="1"?"1":esc(raw))+'</td>';
+      var unpaid=(e.paid&&e.paid[d]===false);
+      var hrs=(e.hours&&e.hours[d]);
+      var tip=[]; if(hrs&&hrs<8)tip.push("ลา "+hrs+" ชม."); if(unpaid)tip.push("ไม่ได้ค่าจ้าง"); if(nt)tip.push("📝 "+nt);
+      body+='<td class="cell '+cls+(nt?" has-note":"")+(unpaid?" unpaid":"")+(hrs?" partial":"")+'" id="c_'+idx+'_'+d+'" data-i="'+idx+'" data-d="'+d+'"'+(tip.length?' title="'+esc(tip.join(" · "))+'"':'')+'>'+((raw==="1"?"1":esc(raw))+((hrs&&hrs<8)?String(hrs):""))+'</td>';
     }
     body+='</tr>';
   });
