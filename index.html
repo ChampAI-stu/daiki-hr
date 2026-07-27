@@ -301,7 +301,7 @@
     <div class="field"><span style="color:var(--muted);font-size:12.5px">ปี พ.ศ.</span><select id="quotaYear"></select></div>
     <button class="btn" id="quotaAddYear" style="background:var(--navy);border-color:var(--navy);color:#fff">＋ เพิ่มปี</button>
     <div class="field grow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="quotaSearch" placeholder="ค้นหาชื่อ / ตำแหน่ง" autocomplete="off"></div>
-    <span class="quota-note">โควตา/ปี: <b>ลากิจ 4 วัน</b> (นับเป็นชม. · 8ชม=1วัน) · <b>ลาป่วย 30 วัน</b> · <b>พักร้อน 6 วัน</b> (&le; ไตรมาสละ 2) — นับเฉพาะ &quot;ได้ตัง&quot;</span>
+    <span class="quota-note"><b>ลากิจ 4 วัน · ลาป่วย 30 วัน</b> (นับเป็นชม. · 8ชม=1วัน) · <b>พักร้อน 6 วัน</b> (&le; ไตรมาสละ 2) — นับเฉพาะ &quot;ได้ตัง&quot;</span>
     <span class="dbmsg" id="leaveMsg" style="margin-left:auto"></span>
   </div>
   <div class="tbl-wrap" id="quotaWrap"><div class="empty-state"><h3>ยังไม่ได้โหลดข้อมูล</h3><div>เลือกปีแล้วกด &quot;โหลดจาก DB&quot;</div></div></div>
@@ -1269,7 +1269,7 @@ window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
   var $=function(id){return ROOT.querySelector('#'+id);};
   function esc(s){return (''+(s==null?'':s)).replace(/[&<>]/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[m];});}
   function say(msg,cls){var el=$('leaveMsg');el.textContent=msg;el.className='dbmsg'+(cls?' '+cls:'');}
-  var POLICY={personal:{label:'ลากิจ',quota:32},sick:{label:'ลาป่วย',quota:30},vacation:{label:'พักร้อน',quota:6,perQuarter:2}};   // personal=ชม.(32) · sick/vacation=วัน
+  var POLICY={personal:{label:'ลากิจ',quota:32},sick:{label:'ลาป่วย',quota:240},vacation:{label:'พักร้อน',quota:6,perQuarter:2}};   // personal/sick=ชม. · vacation=วัน
   var SB=null, loadedYear=null;
   function getSB(){ if(!SB) SB=window.__getSB(); return SB; }
   function emptyUse(){return {sick:0,sick_np:0,personal:0,personal_np:0,vacation:0,vq:[0,0,0,0]};}
@@ -1318,7 +1318,7 @@ window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
       return '<tr><td class="idx num">'+(i+1)+'</td>'+
         '<td class="who"><div class="nm">'+esc(e.name)+(e.nick?' <span class="nick">('+esc(e.nick)+')</span>':'')+'</div><div class="role">'+esc(e.pos||'—')+'</div></td>'+
         '<td>'+qbarP(u.personal,POLICY.personal.quota)+(u.personal_np?'<div style=\"font-size:11px;color:var(--absent);margin-top:3px\">฿&#822; ไม่ได้ตัง '+hoursToDH(u.personal_np)+'</div>':'')+'</td>'+
-        '<td>'+qbar(u.sick,POLICY.sick.quota)+(u.sick_np?'<div style=\"font-size:11px;color:var(--absent);margin-top:3px\">฿&#822; ไม่ได้ตัง '+u.sick_np+' วัน</div>':'')+'</td>'+
+        '<td>'+qbarP(u.sick,POLICY.sick.quota)+(u.sick_np?'<div style=\"font-size:11px;color:var(--absent);margin-top:3px\">฿&#822; ไม่ได้ตัง '+hoursToDH(u.sick_np)+'</div>':'')+'</td>'+
         '<td>'+qbar(u.vacation,POLICY.vacation.quota)+vqChips(u.vq,POLICY.vacation.perQuarter)+'</td>'+
         '<td>'+badge+'</td></tr>';
     }).join('');
@@ -1332,7 +1332,7 @@ window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
     initYear(); var year=+$('quotaYear').value;
     try{
       try{ var pol=await sb.from('daiki_leave_policy').select('*');
-        if(!pol.error && pol.data) pol.data.forEach(function(r){ if(POLICY[r.status_key]){ var q=+r.days_per_year; POLICY[r.status_key].quota=(r.status_key==='personal')?q*8:q; if(r.per_quarter_limit!=null)POLICY[r.status_key].perQuarter=+r.per_quarter_limit;}});
+        if(!pol.error && pol.data) pol.data.forEach(function(r){ if(POLICY[r.status_key]){ var q=+r.days_per_year; POLICY[r.status_key].quota=(r.status_key==='personal'||r.status_key==='sick')?q*8:q; if(r.per_quarter_limit!=null)POLICY[r.status_key].perQuarter=+r.per_quarter_limit;}});
       }catch(_){}
       say('กำลังโหลดสิทธิการลาปี '+year+'...','');
       var start=year+'-01-01', end=(year+1)+'-01-01';
@@ -1344,7 +1344,7 @@ window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
         if(!by[nm]) by[nm]={name:nm,nick:e.nickname||'',pos:e.position||'',use:emptyUse()};
         var u=by[nm].use; var q=Math.floor((+row.work_date.slice(5,7)-1)/3);
         var hr=(row.hours!=null?+row.hours:8);
-        if(row.status_key==='sick'){ if(row.is_paid===false)u.sick_np+=1; else u.sick+=1; }             // ลาป่วย = วัน
+        if(row.status_key==='sick'){ if(row.is_paid===false)u.sick_np+=hr; else u.sick+=hr; }           // ลาป่วย = ชั่วโมง
         else if(row.status_key==='personal'){ if(row.is_paid===false)u.personal_np+=hr; else u.personal+=hr; }   // ลากิจ = ชั่วโมง
         else if(row.status_key==='vacation'){ u.vacation+=1; u.vq[q]+=1; }
       });
