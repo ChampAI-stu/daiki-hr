@@ -129,7 +129,7 @@
   --present:#2E9E6B; --late:#E8912A; --sick:#C24D6B; --personal:#6B6FCB;
   --vacation:#2E93C4; --absent:#D8453A; --dayoff:#B4BAC6; --holiday:#9AA3B5;
   --shadow:0 1px 2px rgba(16,31,54,.06),0 8px 24px rgba(16,31,54,.06);
-}*{box-sizing:border-box}html,body{margin:0;padding:0}body{font-family:'IBM Plex Sans Thai',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}#view-grid .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}#view-grid h1,#view-grid h2{font-family:'Anuphan';margin:0;font-weight:600;letter-spacing:-.01em}#view-grid .topbar{background:var(--navy);color:#fff;position:sticky;top:0;z-index:60;border-bottom:3px solid var(--orange)}#view-grid .topbar-in{max-width:1400px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}#view-grid .brand{display:flex;align-items:center;gap:11px;margin-right:auto}#view-grid .mark{width:34px;height:34px}#view-grid .brand .t1{font-family:'Anuphan';font-weight:700;font-size:17px;line-height:1;letter-spacing:.02em}#view-grid .brand .t2{font-size:11.5px;color:#AEB8CF;margin-top:3px}#view-grid .mode-tag{font-size:11px;font-weight:600;color:var(--ink);background:var(--orange);padding:4px 10px;border-radius:999px}#view-grid .mode-tag.live{background:#2E9E6B;color:#fff}#view-grid .dbbar{background:#152540;border-bottom:1px solid rgba(255,255,255,.08)}#view-grid .dbbar-in{max-width:1400px;margin:0 auto;padding:10px 22px;display:flex;gap:9px;align-items:center;flex-wrap:wrap}#view-grid .dblab{color:var(--orange);font-family:'Anuphan';font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase}#view-grid .dbbar input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:#fff;border-radius:8px;padding:7px 10px;font-family:inherit;font-size:12.5px;outline:none}#view-grid .dbbar input::placeholder{color:#7C88A6}#view-grid .dbbar input.url{width:230px}#view-grid .dbbar input.key{width:150px}#view-grid .dbbar input.mon{width:140px;color-scheme:dark}#view-grid .dbbtn{font-family:inherit;font-size:12.5px;font-weight:600;border-radius:8px;padding:7px 12px;cursor:pointer;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff}#view-grid .dbbtn.go{background:var(--orange);color:var(--ink);border:none}#view-grid .dbbtn.load{background:#2E9E6B;color:#fff;border:none}#view-grid .dbbtn:hover{filter:brightness(1.08)}#view-grid .dbmsg{font-size:12px;color:#AEB8CF;margin-left:auto}#view-grid .dbmsg.ok{color:#7FE0AE}#view-grid .dbmsg.err{color:#FF9E93}#view-grid .wrap{max-width:1400px;margin:0 auto;padding:18px 22px}#view-grid .toolbar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px}#view-grid .brushes{display:flex;gap:6px;flex-wrap:wrap;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:7px 9px;box-shadow:var(--shadow)}#view-grid .brushes .lbl{font-size:12px;color:var(--muted);margin-right:2px}#view-grid .brush{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;border:1.5px solid var(--line);background:#fff;border-radius:9px;padding:6px 10px;cursor:pointer;font-family:inherit}#view-grid .brush .sw{width:15px;height:15px;border-radius:4px;font-family:'Anuphan';font-weight:700;font-size:10px;display:flex;align-items:center;justify-content:center;color:#fff}#view-grid .brush.active{border-color:var(--ink);box-shadow:0 0 0 2px rgba(16,31,54,.08)}#view-grid .brush.eraser .sw{background:#fff;border:1px solid var(--line);color:var(--muted)}#view-grid .save-ind{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:7px;margin-left:auto}#view-grid .save-ind .d{width:9px;height:9px;border-radius:50%;background:#CBCEC7}#view-grid .save-ind.saving .d{background:var(--late);animation:pulse 1s infinite}#view-grid .save-ind.saved .d{background:var(--present)}#view-grid .save-ind.err .d{background:var(--absent)}@keyframes pulse{50%{opacity:.35}}#view-grid .addbtn{font-family:inherit;font-size:12.5px;font-weight:600;border:1px dashed var(--navy);color:var(--navy);background:#fff;border-radius:9px;padding:8px 12px;cursor:pointer}#view-grid .addbtn:hover{background:var(--orange-soft)}#view-grid .grid-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:auto;max-height:74vh}#view-grid table.grid{border-collapse:separate;border-spacing:0;font-size:12.5px}#view-grid .grid th,#view-grid .grid td{border-right:1px solid #F0F0EA;border-bottom:1px solid #F0F0EA;text-align:center;white-space:nowrap}#view-grid .grid thead th{position:sticky;top:0;z-index:5;background:#F7F7F3;color:var(--muted);font-weight:600;font-size:11px;padding:7px 4px;height:44px}#view-grid .grid thead th.wknd{background:#EFEFE9;color:var(--absent)}#view-grid .grid th.hcol{min-width:34px}#view-grid .grid th.dnum{font-family:'Anuphan';font-size:13px;color:var(--ink)}#view-grid .grid th.dow{font-weight:500}#view-grid .cn{position:sticky;z-index:4;background:var(--panel)}#view-grid .c-idx{left:0;width:34px;min-width:34px}#view-grid .c-name{left:34px;min-width:190px;max-width:190px;text-align:left}#view-grid .c-sum{left:224px;width:46px;min-width:46px}#view-grid .grid thead th.cn{z-index:7;background:#F7F7F3}#view-grid .grid tbody td.cn{border-bottom:1px solid #F0F0EA}#view-grid td.c-name{padding:5px 10px}#view-grid td.c-name .nm{font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px}#view-grid td.c-name .nm .nick{color:var(--orange)}#view-grid td.c-name .role{font-size:10.5px;color:var(--muted)}#view-grid td.c-sum{font-family:'Anuphan';font-weight:700;color:var(--present);font-size:14px}#view-grid tbody tr:hover td.cn{background:#FBFAF6}#view-grid td.cell{width:30px;min-width:30px;height:34px;cursor:pointer;font-family:'Anuphan';font-weight:600;user-select:none;color:var(--ink)}#view-grid td.cell:hover{outline:2px solid var(--orange);outline-offset:-2px}#view-grid table.grid.nobrush td.cell{cursor:default}#view-grid table.grid.nobrush td.cell:hover{outline:none}#view-grid td.cell.present{background:#EAF6F0;color:var(--present)}#view-grid td.cell.late{background:#FDF1E1;color:var(--late)}#view-grid td.cell.sick{background:#FBEBF0;color:var(--sick)}#view-grid td.cell.personal{background:#EDEDFA;color:var(--personal)}#view-grid td.cell.vacation{background:#E8F4FA;color:var(--vacation)}#view-grid td.cell.absent{background:#FCEAE8;color:var(--absent)}#view-grid td.cell.dayoff{background:#F3F3F0;color:var(--dayoff)}#view-grid td.cell.holiday{background:#F3F3F0;color:var(--holiday)}#view-grid td.cell.wknd{background:#FAFAF6}#view-grid td.cell{position:relative}#view-grid td.cell.has-note::after{content:"";position:absolute;top:1px;right:1px;border-top:7px solid var(--orange);border-left:7px solid transparent}#view-grid td.cell.unpaid{background-image:repeating-linear-gradient(45deg,rgba(0,0,0,0) 0,rgba(0,0,0,0) 3px,rgba(0,0,0,.10) 3px,rgba(0,0,0,.10) 5px)}#view-grid td.cell.unpaid::before{content:"฿";position:absolute;bottom:-1px;left:1px;font-size:9px;color:var(--absent);text-decoration:line-through;font-weight:700}#view-grid .brush-drop{font-family:inherit;font-size:12.5px;border:1.5px solid var(--ink);border-radius:9px;padding:6px 8px;background:var(--orange-soft);color:var(--ink);cursor:pointer;margin-left:-3px;outline:none}#view-grid .paidsel{display:flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;box-shadow:var(--shadow);font-size:12.5px;color:var(--muted)}#view-grid .paidsel select{font-family:inherit;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:6px 9px;background:#fff;color:var(--ink);cursor:pointer;outline:none}#view-grid .brush.note .sw{color:#fff}#view-grid td.cell.flash{animation:flash .8s}@keyframes flash{0%{box-shadow:inset 0 0 0 3px var(--orange)}100%{box-shadow:none}}#view-grid .grid tfoot td{position:sticky;bottom:0;z-index:5;background:#F2F5F8;font-family:'Anuphan';font-weight:600;color:var(--navy);font-size:12px;padding:7px 3px}#view-grid .grid tfoot td.cn{z-index:7}#view-grid .grid tfoot td.foot-lab{text-align:right;padding-right:10px;color:var(--muted);font-weight:600}#view-grid .legend{display:flex;gap:13px;flex-wrap:wrap;margin-top:13px;font-size:12px;color:var(--muted)}#view-grid .legend span{display:inline-flex;align-items:center;gap:6px}#view-grid .legend i{width:11px;height:11px;border-radius:3px}#view-grid .hint{font-size:12.5px;color:var(--muted);margin:2px 0 12px}#view-grid .hint b{color:var(--ink)}
+}*{box-sizing:border-box}html,body{margin:0;padding:0}body{font-family:'IBM Plex Sans Thai',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}#view-grid .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}#view-grid h1,#view-grid h2{font-family:'Anuphan';margin:0;font-weight:600;letter-spacing:-.01em}#view-grid .topbar{background:var(--navy);color:#fff;position:sticky;top:0;z-index:60;border-bottom:3px solid var(--orange)}#view-grid .topbar-in{max-width:1400px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}#view-grid .brand{display:flex;align-items:center;gap:11px;margin-right:auto}#view-grid .mark{width:34px;height:34px}#view-grid .brand .t1{font-family:'Anuphan';font-weight:700;font-size:17px;line-height:1;letter-spacing:.02em}#view-grid .brand .t2{font-size:11.5px;color:#AEB8CF;margin-top:3px}#view-grid .mode-tag{font-size:11px;font-weight:600;color:var(--ink);background:var(--orange);padding:4px 10px;border-radius:999px}#view-grid .mode-tag.live{background:#2E9E6B;color:#fff}#view-grid .dbbar{background:#152540;border-bottom:1px solid rgba(255,255,255,.08)}#view-grid .dbbar-in{max-width:1400px;margin:0 auto;padding:10px 22px;display:flex;gap:9px;align-items:center;flex-wrap:wrap}#view-grid .dblab{color:var(--orange);font-family:'Anuphan';font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase}#view-grid .dbbar input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:#fff;border-radius:8px;padding:7px 10px;font-family:inherit;font-size:12.5px;outline:none}#view-grid .dbbar input::placeholder{color:#7C88A6}#view-grid .dbbar input.url{width:230px}#view-grid .dbbar input.key{width:150px}#view-grid .dbbar input.mon{width:140px;color-scheme:dark}#view-grid .dbbtn{font-family:inherit;font-size:12.5px;font-weight:600;border-radius:8px;padding:7px 12px;cursor:pointer;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff}#view-grid .dbbtn.go{background:var(--orange);color:var(--ink);border:none}#view-grid .dbbtn.load{background:#2E9E6B;color:#fff;border:none}#view-grid .dbbtn:hover{filter:brightness(1.08)}#view-grid .dbmsg{font-size:12px;color:#AEB8CF;margin-left:auto}#view-grid .dbmsg.ok{color:#7FE0AE}#view-grid .dbmsg.err{color:#FF9E93}#view-grid .wrap{max-width:1400px;margin:0 auto;padding:18px 22px}#view-grid .toolbar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px}#view-grid .brushes{display:flex;gap:6px;flex-wrap:wrap;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:7px 9px;box-shadow:var(--shadow)}#view-grid .brushes .lbl{font-size:12px;color:var(--muted);margin-right:2px}#view-grid .brush{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;border:1.5px solid var(--line);background:#fff;border-radius:9px;padding:6px 10px;cursor:pointer;font-family:inherit}#view-grid .brush .sw{width:15px;height:15px;border-radius:4px;font-family:'Anuphan';font-weight:700;font-size:10px;display:flex;align-items:center;justify-content:center;color:#fff}#view-grid .brush.active{border-color:var(--ink);box-shadow:0 0 0 2px rgba(16,31,54,.08)}#view-grid .brush.eraser .sw{background:#fff;border:1px solid var(--line);color:var(--muted)}#view-grid .save-ind{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:7px;margin-left:auto}#view-grid .save-ind .d{width:9px;height:9px;border-radius:50%;background:#CBCEC7}#view-grid .save-ind.saving .d{background:var(--late);animation:pulse 1s infinite}#view-grid .save-ind.saved .d{background:var(--present)}#view-grid .save-ind.err .d{background:var(--absent)}@keyframes pulse{50%{opacity:.35}}#view-grid .addbtn{font-family:inherit;font-size:12.5px;font-weight:600;border:1px dashed var(--navy);color:var(--navy);background:#fff;border-radius:9px;padding:8px 12px;cursor:pointer}#view-grid .addbtn:hover{background:var(--orange-soft)}#view-grid .grid-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:auto;max-height:74vh}#view-grid table.grid{border-collapse:separate;border-spacing:0;font-size:12.5px}#view-grid .grid th,#view-grid .grid td{border-right:1px solid #F0F0EA;border-bottom:1px solid #F0F0EA;text-align:center;white-space:nowrap}#view-grid .grid thead th{position:sticky;top:0;z-index:5;background:#F7F7F3;color:var(--muted);font-weight:600;font-size:11px;padding:7px 4px;height:44px}#view-grid .grid thead th.wknd{background:#EFEFE9;color:var(--absent)}#view-grid .grid th.hcol{min-width:34px}#view-grid .grid th.dnum{font-family:'Anuphan';font-size:13px;color:var(--ink)}#view-grid .grid th.dow{font-weight:500}#view-grid .cn{position:sticky;z-index:4;background:var(--panel)}#view-grid .c-idx{left:0;width:34px;min-width:34px}#view-grid .c-name{left:34px;min-width:190px;max-width:190px;text-align:left}#view-grid .c-sum{left:224px;width:46px;min-width:46px}#view-grid .grid thead th.cn{z-index:7;background:#F7F7F3}#view-grid .grid tbody td.cn{border-bottom:1px solid #F0F0EA}#view-grid td.c-name{padding:5px 10px}#view-grid td.c-name .nm{font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px}#view-grid td.c-name .nm .nick{color:var(--orange)}#view-grid td.c-name .role{font-size:10.5px;color:var(--muted)}#view-grid td.c-sum{font-family:'Anuphan';font-weight:700;color:var(--present);font-size:14px}#view-grid tbody tr:hover td.cn{background:#FBFAF6}#view-grid td.cell{width:30px;min-width:30px;height:34px;cursor:pointer;font-family:'Anuphan';font-weight:600;user-select:none;color:var(--ink)}#view-grid td.cell:hover{outline:2px solid var(--orange);outline-offset:-2px}#view-grid table.grid.nobrush td.cell{cursor:default}#view-grid table.grid.nobrush td.cell:hover{outline:none}#view-grid td.cell.present{background:#EAF6F0;color:var(--present)}#view-grid td.cell.late{background:#FDF1E1;color:var(--late)}#view-grid td.cell.sick{background:#FBEBF0;color:var(--sick)}#view-grid td.cell.personal{background:#EDEDFA;color:var(--personal)}#view-grid td.cell.vacation{background:#E8F4FA;color:var(--vacation)}#view-grid td.cell.absent{background:#FCEAE8;color:var(--absent)}#view-grid td.cell.dayoff{background:#F3F3F0;color:var(--dayoff)}#view-grid td.cell.holiday{background:#F3F3F0;color:var(--holiday)}#view-grid td.cell.wknd{background:#FAFAF6}#view-grid td.cell{position:relative}#view-grid td.cell.has-note::after{content:"";position:absolute;top:1px;right:1px;border-top:7px solid var(--orange);border-left:7px solid transparent}#view-grid td.cell.unpaid{background-image:repeating-linear-gradient(45deg,rgba(0,0,0,0) 0,rgba(0,0,0,0) 3px,rgba(0,0,0,.10) 3px,rgba(0,0,0,.10) 5px)}#view-grid td.cell.unpaid::before{content:"฿";position:absolute;bottom:-1px;left:1px;font-size:9px;color:var(--absent);text-decoration:line-through;font-weight:700}#view-grid td.cell.partial{font-weight:800}#view-grid .brush-drop{font-family:inherit;font-size:12.5px;border:1.5px solid var(--ink);border-radius:9px;padding:6px 8px;background:var(--orange-soft);color:var(--ink);cursor:pointer;margin-left:-3px;outline:none}#view-grid .paidsel{display:flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;box-shadow:var(--shadow);font-size:12.5px;color:var(--muted)}#view-grid .paidsel select{font-family:inherit;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:6px 9px;background:#fff;color:var(--ink);cursor:pointer;outline:none}#view-grid .brush.note .sw{color:#fff}#view-grid td.cell.flash{animation:flash .8s}@keyframes flash{0%{box-shadow:inset 0 0 0 3px var(--orange)}100%{box-shadow:none}}#view-grid .grid tfoot td{position:sticky;bottom:0;z-index:5;background:#F2F5F8;font-family:'Anuphan';font-weight:600;color:var(--navy);font-size:12px;padding:7px 3px}#view-grid .grid tfoot td.cn{z-index:7}#view-grid .grid tfoot td.foot-lab{text-align:right;padding-right:10px;color:var(--muted);font-weight:600}#view-grid .legend{display:flex;gap:13px;flex-wrap:wrap;margin-top:13px;font-size:12px;color:var(--muted)}#view-grid .legend span{display:inline-flex;align-items:center;gap:6px}#view-grid .legend i{width:11px;height:11px;border-radius:3px}#view-grid .hint{font-size:12.5px;color:var(--muted);margin:2px 0 12px}#view-grid .hint b{color:var(--ink)}
 
 
 #view-employees .emp-form{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:18px 20px;margin-bottom:16px}
@@ -299,7 +299,7 @@
   <div class="controls">
     <div class="field"><span style="color:var(--muted);font-size:12.5px">ปี พ.ศ.</span><select id="quotaYear"></select></div>
     <button class="btn" id="quotaAddYear" style="background:var(--navy);border-color:var(--navy);color:#fff">＋ เพิ่มปี</button>
-    <span class="quota-note">โควตา/ปี: <b>ลากิจ 4</b> · <b>ลาป่วย 30</b> · <b>พักร้อน 6</b> (พักร้อน &le; ไตรมาสละ 2) — <b>นับเฉพาะ &quot;ได้ตัง&quot;</b> · อัปเดตอัตโนมัติเมื่อเข้าแท็บ</span>
+    <span class="quota-note"><b>1 วัน = 8 ชม.</b> · โควตา/ปี: <b>ลากิจ 32ชม</b> · <b>ลาป่วย 240ชม</b> · <b>พักร้อน 48ชม</b> (&le; ไตรมาสละ 16ชม) — นับเฉพาะ &quot;ได้ตัง&quot;</span>
     <span class="dbmsg" id="leaveMsg" style="margin-left:auto"></span>
   </div>
   <div class="tbl-wrap" id="quotaWrap"><div class="empty-state"><h3>ยังไม่ได้โหลดข้อมูล</h3><div>เลือกปีแล้วกด &quot;โหลดจาก DB&quot;</div></div></div>
@@ -993,6 +993,7 @@ var Y=2026, M=6;            // M = 0-based month (July=6)
 var EMP=[];                  // {id, dbId, code, name, nick, pos, cells:{day:rawCode}}
 var brush="present";
 var paidMode="paid";   // ได้ตัง/ไม่ได้ตัง สำหรับแปรงลาป่วย/ลากิจ
+var leaveHours=8;      // ชั่วโมงที่ลา (1 วัน = 8 ชม.)
 var SB=null, LIVE=false, channel=null;
 var saveQueue={}, recentLocal={}, flushTimer=null;
 
@@ -1007,9 +1008,12 @@ function renderBrushes(){
     var btn='<button class="brush'+(brush===b.k?' active':'')+'" data-k="'+b.k+'">'+
       '<span class="sw" style="background:'+b.color+'">'+b.code+'</span>'+b.label+'</button>';
     if(b.leave && brush===b.k){
-      btn+='<select class="brush-drop" data-for="'+b.k+'">'+
+      btn+='<select class="brush-drop" data-role="paid">'+
         '<option value="paid"'+(paidMode==="paid"?" selected":"")+'>ได้ตัง 💰</option>'+
         '<option value="unpaid"'+(paidMode==="unpaid"?" selected":"")+'>ไม่ได้ตัง ฿̶</option></select>';
+      var hopts='<option value="8"'+(leaveHours==8?" selected":"")+'>เต็มวัน (8ชม)</option>';
+      for(var hh=1;hh<=7;hh++) hopts+='<option value="'+hh+'"'+(leaveHours==hh?" selected":"")+'>'+hh+' ชม.</option>';
+      btn+='<select class="brush-drop" data-role="hours">'+hopts+'</select>';
     }
     return btn;
   }).join("");
@@ -1021,7 +1025,7 @@ function renderBrushes(){
   });
   $("brushList").querySelectorAll(".brush-drop").forEach(function(s){
     s.onclick=function(ev){ ev.stopPropagation(); };
-    s.onchange=function(){ paidMode=s.value; };
+    s.onchange=function(){ if(s.dataset.role==="hours"){ leaveHours=+s.value; } else { paidMode=s.value; } };
   });
 }
 
@@ -1093,7 +1097,7 @@ function editNote(idx,day){
 function saveNote(idx,day,text){ markDirty(idx,day); }   // ค้างไว้ บันทึกด้วยปุ่ม 💾
 
 function applyBrush(idx,day){
-  var e=EMP[idx]; if(!e) return; if(!e.paid) e.paid={}; if(!e.notes) e.notes={};
+  var e=EMP[idx]; if(!e) return; if(!e.paid) e.paid={}; if(!e.notes) e.notes={}; if(!e.hours) e.hours={};
   var erase=(brush==="__erase");
   var b=erase?null:BRUSHMAP[brush]; if(!erase && !b) return;
   var code=erase?"":b.code;
@@ -1103,8 +1107,9 @@ function applyBrush(idx,day){
   var cur=e.cells[day]||"";
   if(erase){ if(cur==="" && e.paid[day]===undefined && e.notes[day]==null) return; }
   else if(cur===code && (e.paid[day]===false)===(paid===false)) return;
-  if(erase){ delete e.cells[day]; delete e.paid[day]; delete e.notes[day]; }   // ล้างโน๊ตด้วย
-  else{ e.cells[day]=code; if(paid===false) e.paid[day]=false; else delete e.paid[day]; }
+  if(erase){ delete e.cells[day]; delete e.paid[day]; delete e.notes[day]; delete e.hours[day]; }   // ล้างโน๊ต+ชม.ด้วย
+  else{ e.cells[day]=code; if(paid===false) e.paid[day]=false; else delete e.paid[day];
+        if(isLeave && leaveHours && leaveHours<8) e.hours[day]=leaveHours; else delete e.hours[day]; }
   paintCell(idx,day);
   recomputeSoon();
   markDirty(idx,day);
@@ -1116,9 +1121,10 @@ function paintCell(idx,day){
   var dow=new Date(Y,M,day).getDay(); var wk=(dow===0||dow===6);
   var nt=(e.notes&&e.notes[day])||"";
   var unpaid=(e.paid&&e.paid[day]===false);
-  td.className="cell "+((k&&k!=="other")?k:(wk?"wknd":""))+(nt?" has-note":"")+(unpaid?" unpaid":"");
-  td.textContent = raw==="1"?"1":raw;
-  var tip=[]; if(unpaid)tip.push("ไม่ได้ค่าจ้าง"); if(nt)tip.push("📝 "+nt);
+  var hrs=(e.hours&&e.hours[day]);
+  td.className="cell "+((k&&k!=="other")?k:(wk?"wknd":""))+(nt?" has-note":"")+(unpaid?" unpaid":"")+(hrs?" partial":"");
+  td.textContent = (raw==="1"?"1":raw)+((hrs&&hrs<8)?String(hrs):"");
+  var tip=[]; if(hrs&&hrs<8)tip.push("ลา "+hrs+" ชม."); if(unpaid)tip.push("ไม่ได้ค่าจ้าง"); if(nt)tip.push("📝 "+nt);
   if(tip.length) td.title=tip.join(" · "); else td.removeAttribute("title");
 }
 function flashCell(idx,day){ var td=$("c_"+idx+"_"+day); if(!td)return; td.classList.remove("flash"); void td.offsetWidth; td.classList.add("flash"); }
@@ -1149,9 +1155,10 @@ window.__saveGrid=async function(){
   var ups=[], dels=[];
   keys.forEach(function(k){ var p=k.split("|"), idx=+p[0], day=+p[1]; var e=EMP[idx]; if(!e||!e.dbId) return;
     var code=e.cells[day]||""; var note=(e.notes&&e.notes[day])||null; var paid=(e.paid&&e.paid[day]===false)?false:null;
+    var hrs=(e.hours&&e.hours[day])||null;
     var wd=Y+"-"+p2(M+1)+"-"+p2(day);
     if(code===""&&!note){ dels.push({employee_id:e.dbId,work_date:wd}); }
-    else{ ups.push({employee_id:e.dbId,work_date:wd,raw_code:code||null,status_key:code?classify(code):null,is_paid:paid,note:note,source:"grid"}); }
+    else{ ups.push({employee_id:e.dbId,work_date:wd,raw_code:code||null,status_key:code?classify(code):null,is_paid:paid,note:note,hours:hrs,source:"grid"}); }
   });
   try{ setSave("saving","กำลังบันทึก...");
     for(var i=0;i<ups.length;i+=500){ var r=await SB.from("daiki_attendance").upsert(ups.slice(i,i+500),{onConflict:"employee_id,work_date"}); if(r.error) throw r.error; }
@@ -1164,7 +1171,7 @@ $("addEmp").addEventListener("click", async function(){
   var name=prompt("ชื่อ-นามสกุล:"); if(!name||!name.trim())return; name=name.trim();
   var nick=(prompt("ชื่อเล่น (เว้นว่างได้):")||"").trim();
   var pos=(prompt("ตำแหน่ง (เว้นว่างได้):")||"").trim();
-  var row={id:"tmp_"+Date.now(), dbId:null, code:"", name:name, nick:nick, pos:pos, cells:{}, notes:{}, paid:{}};
+  var row={id:"tmp_"+Date.now(), dbId:null, code:"", name:name, nick:nick, pos:pos, cells:{}, notes:{}, paid:{}, hours:{}};
   if(LIVE){
     try{ var r=await SB.from("daiki_employees").upsert({full_name:name,nickname:nick||null,position:pos||null},{onConflict:"full_name"}).select("id").single();
       if(r.error) throw r.error; row.dbId=r.data.id; }
@@ -1189,7 +1196,7 @@ async function loadMonth(){
   if(window.__staged && window.__staged.byMonth[mv]){          // พรีวิวจากไฟล์ (ยังไม่บันทึก)
     var mn=window.__staged.byMonth[mv];
     EMP=mn.employees.map(function(e,i){ var cells={}; mn.days.forEach(function(d,idx){ var v=e.cells[idx]; if(v!=null&&(""+v).trim()!=="") cells[d]=(""+v).trim(); });
-      return {id:"st"+i, dbId:null, code:e.code||"", name:e.name, nick:e.nick||"", pos:e.pos||"", cells:cells, notes:{}, paid:{}}; });
+      return {id:"st"+i, dbId:null, code:e.code||"", name:e.name, nick:e.nick||"", pos:e.pos||"", cells:cells, notes:{}, paid:{}, hours:{}}; });
     EMP._byId={}; LIVE=false; $("modeTag").textContent="พรีวิวจากไฟล์ (ยังไม่บันทึก)"; $("modeTag").className="mode-tag";
     renderGrid(); dbSay("พรีวิวจากไฟล์ — บันทึกที่ปุ่ม 💾 บนแถบเมนู","ok"); return;
   }
@@ -1198,7 +1205,7 @@ async function loadMonth(){
     dbSay("กำลังโหลดพนักงาน...","");
     var erdata=await window.__pageAll(function(f,t){ return SB.from("daiki_employees").select("id,emp_code,full_name,nickname,position,is_active,seq").eq("is_active",true).order("seq",{ascending:true,nullsFirst:false}).order("full_name",{ascending:true}).range(f,t); });
     if(!erdata.length){ dbSay("ยังไม่มีพนักงานใน DB — นำเข้าจากแดชบอร์ดก่อน หรือกด \"＋ เพิ่มพนักงาน\"","err"); }
-    EMP=erdata.map(function(r){ return {id:r.id, dbId:r.id, code:r.emp_code||"", name:r.full_name, nick:r.nickname||"", pos:r.position||"", cells:{}, notes:{}, paid:{}}; });
+    EMP=erdata.map(function(r){ return {id:r.id, dbId:r.id, code:r.emp_code||"", name:r.full_name, nick:r.nickname||"", pos:r.position||"", cells:{}, notes:{}, paid:{}, hours:{}}; });
     var byId={}; EMP.forEach(function(e,i){ byId[e.dbId]=i; }); EMP._byId=byId;
     dbSay("กำลังโหลดข้อมูลเดือน "+mv+"...","");
     var start=Y+"-"+p2(M+1)+"-01", end=(M===11?(Y+1)+"-01":Y+"-"+p2(M+2))+"-01";
@@ -1206,7 +1213,8 @@ async function loadMonth(){
     ardata.forEach(function(row){ var i=byId[row.employee_id]; if(i==null)return; var day=+row.work_date.slice(8,10);
       if(row.status_key){ EMP[i].cells[day]=row.raw_code||(KEYMAP[row.status_key]?KEYMAP[row.status_key].code:""); }
       if(row.note){ EMP[i].notes[day]=row.note; }
-      if(row.is_paid===false){ EMP[i].paid[day]=false; } });
+      if(row.is_paid===false){ EMP[i].paid[day]=false; }
+      if(row.hours!=null && +row.hours<8){ EMP[i].hours[day]=+row.hours; } });
     LIVE=true; dirty={}; $("modeTag").textContent="เชื่อมต่อแล้ว"; $("modeTag").className="mode-tag live";
     renderGrid();
     dbSay("โหลดสำเร็จ ✓ "+EMP.length+" คน · เดือน "+mv+" — แก้ไขได้ แล้วกด 💾 บันทึก","ok");
@@ -1228,7 +1236,7 @@ $("legend").innerHTML="คำอธิบาย:&nbsp;&nbsp;"+STATUS.map(functio
   var s=JSON.parse($("sampleData").textContent);
   Y=s.y; M=s.m-1;
   EMP=s.employees.map(function(e,i){ var cells={}; Object.keys(e.cells).forEach(function(d){cells[+d]=e.cells[d];});
-    return {id:"s"+i, dbId:null, code:e.code||"", name:e.name, nick:e.nick||"", pos:e.pos||"", cells:cells, notes:{}, paid:{}}; });
+    return {id:"s"+i, dbId:null, code:e.code||"", name:e.name, nick:e.nick||"", pos:e.pos||"", cells:cells, notes:{}, paid:{}, hours:{}}; });
   if(window.__ym && /^\d{4}-\d{2}$/.test(window.__ym)){ Y=+window.__ym.slice(0,4); M=+window.__ym.slice(5,7)-1; }
   renderBrushes(); renderGrid();
 
@@ -1249,7 +1257,7 @@ window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
   var $=function(id){return ROOT.querySelector('#'+id);};
   function esc(s){return (''+(s==null?'':s)).replace(/[&<>]/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[m];});}
   function say(msg,cls){var el=$('leaveMsg');el.textContent=msg;el.className='dbmsg'+(cls?' '+cls:'');}
-  var POLICY={personal:{label:'ลากิจ',quota:4},sick:{label:'ลาป่วย',quota:30},vacation:{label:'พักร้อน',quota:6,perQuarter:2}};
+  var POLICY={personal:{label:'ลากิจ',quota:32},sick:{label:'ลาป่วย',quota:240},vacation:{label:'พักร้อน',quota:48,perQuarter:16}};   // ชั่วโมง (1 วัน=8ชม)
   var SB=null, loadedYear=null;
   function getSB(){ if(!SB) SB=window.__getSB(); return SB; }
   function emptyUse(){return {sick:0,sick_np:0,personal:0,personal_np:0,vacation:0,vq:[0,0,0,0]};}
@@ -1272,11 +1280,11 @@ window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
       var col=over?'var(--absent)':(used>=quota*0.8?'var(--late)':'var(--present)');
       return '<div class="qcell"><div class="qtop"><b class="'+(over?'over':'')+'">'+used+'</b>/'+quota+'</div>'+
         '<div class="qtrack"><div class="qfill" style="width:'+pct+'%;background:'+col+'"></div></div>'+
-        '<div class="qrem'+(over?' over':'')+'">'+(over?('เกิน '+(used-quota)):('เหลือ '+(quota-used)))+' วัน</div></div>';
+        '<div class="qrem'+(over?' over':'')+'">'+(over?('เกิน '+(used-quota)):('เหลือ '+(quota-used)))+' ชม.</div></div>';
     }
     function vqChips(vq,lim){return '<div class="vq">'+vq.map(function(v,i){var o=v>lim;return '<span class="vqx'+(o?' over':'')+'">Q'+(i+1)+' '+v+'</span>';}).join('')+'</div>';}
     var head='<table><thead><tr><th style="width:44px">#</th><th class="l">พนักงาน</th>'+
-      '<th>ลากิจ (4)</th><th>ลาป่วย (30)</th><th>พักร้อน (6) · รายไตรมาส</th><th>สถานะ</th></tr></thead><tbody>';
+      '<th>ลากิจ (32ชม)</th><th>ลาป่วย (240ชม)</th><th>พักร้อน (48ชม) · รายไตรมาส</th><th>สถานะ</th></tr></thead><tbody>';
     var body=list.map(function(e,i){
       var u=e.use;
       var pOver=u.personal>POLICY.personal.quota, sOver=u.sick>POLICY.sick.quota,
@@ -1286,8 +1294,8 @@ window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
       var badge=flags.length?'<span class="badge over" title="'+esc(flags.join(', '))+'">เกินสิทธิ ('+flags.length+')</span>':'<span class="badge ok">ปกติ</span>';
       return '<tr><td class="idx num">'+(i+1)+'</td>'+
         '<td class="who"><div class="nm">'+esc(e.name)+(e.nick?' <span class="nick">('+esc(e.nick)+')</span>':'')+'</div><div class="role">'+esc(e.pos||'—')+'</div></td>'+
-        '<td>'+qbar(u.personal,POLICY.personal.quota)+(u.personal_np?'<div style=\"font-size:11px;color:var(--absent);margin-top:3px\">฿&#822; ไม่ได้ตัง '+u.personal_np+' วัน</div>':'')+'</td>'+
-        '<td>'+qbar(u.sick,POLICY.sick.quota)+(u.sick_np?'<div style=\"font-size:11px;color:var(--absent);margin-top:3px\">฿&#822; ไม่ได้ตัง '+u.sick_np+' วัน</div>':'')+'</td>'+
+        '<td>'+qbar(u.personal,POLICY.personal.quota)+(u.personal_np?'<div style=\"font-size:11px;color:var(--absent);margin-top:3px\">฿&#822; ไม่ได้ตัง '+u.personal_np+' ชม.</div>':'')+'</td>'+
+        '<td>'+qbar(u.sick,POLICY.sick.quota)+(u.sick_np?'<div style=\"font-size:11px;color:var(--absent);margin-top:3px\">฿&#822; ไม่ได้ตัง '+u.sick_np+' ชม.</div>':'')+'</td>'+
         '<td>'+qbar(u.vacation,POLICY.vacation.quota)+vqChips(u.vq,POLICY.vacation.perQuarter)+'</td>'+
         '<td>'+badge+'</td></tr>';
     }).join('');
@@ -1305,16 +1313,17 @@ window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
       }catch(_){}
       say('กำลังโหลดสิทธิการลาปี '+year+'...','');
       var start=year+'-01-01', end=(year+1)+'-01-01';
-      var rdata=await window.__pageAll(function(f,t){ return sb.from('daiki_attendance').select('work_date,status_key,is_paid,daiki_employees(full_name,nickname,position)')
+      var rdata=await window.__pageAll(function(f,t){ return sb.from('daiki_attendance').select('work_date,status_key,is_paid,hours,daiki_employees(full_name,nickname,position)')
         .in('status_key',['sick','personal','vacation']).gte('work_date',start).lt('work_date',end).order('work_date',{ascending:true}).range(f,t); });
       var by={};
       rdata.forEach(function(row){
         var e=row.daiki_employees||{}; var nm=e.full_name||'(ไม่ระบุ)';
         if(!by[nm]) by[nm]={name:nm,nick:e.nickname||'',pos:e.position||'',use:emptyUse()};
         var u=by[nm].use; var q=Math.floor((+row.work_date.slice(5,7)-1)/3);
-        if(row.status_key==='sick'){ if(row.is_paid===false)u.sick_np++; else u.sick++; }
-        else if(row.status_key==='personal'){ if(row.is_paid===false)u.personal_np++; else u.personal++; }
-        else if(row.status_key==='vacation'){ u.vacation++; u.vq[q]++; }
+        var hr=(row.hours!=null?+row.hours:8);
+        if(row.status_key==='sick'){ if(row.is_paid===false)u.sick_np+=hr; else u.sick+=hr; }
+        else if(row.status_key==='personal'){ if(row.is_paid===false)u.personal_np+=hr; else u.personal+=hr; }
+        else if(row.status_key==='vacation'){ u.vacation+=hr; u.vq[q]+=hr; }
       });
       loadedYear=year;
       render(by,'ทั้งปี '+(year+543)+' · จากฐานข้อมูล');
