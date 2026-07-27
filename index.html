@@ -1317,7 +1317,7 @@ window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
     initYear(); var year=+$('quotaYear').value;
     try{
       try{ var pol=await sb.from('daiki_leave_policy').select('*');
-        if(!pol.error && pol.data) pol.data.forEach(function(r){ if(POLICY[r.status_key]){POLICY[r.status_key].quota=+r.days_per_year; if(r.per_quarter_limit!=null)POLICY[r.status_key].perQuarter=+r.per_quarter_limit;}});
+        if(!pol.error && pol.data) pol.data.forEach(function(r){ if(POLICY[r.status_key]){ var q=+r.days_per_year; POLICY[r.status_key].quota=(r.status_key==='personal')?q*8:q; if(r.per_quarter_limit!=null)POLICY[r.status_key].perQuarter=+r.per_quarter_limit;}});
       }catch(_){}
       say('กำลังโหลดสิทธิการลาปี '+year+'...','');
       var start=year+'-01-01', end=(year+1)+'-01-01';
