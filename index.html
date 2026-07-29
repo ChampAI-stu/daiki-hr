@@ -1525,10 +1525,12 @@ window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
     try{
       try{ var pol=await sb.from('daiki_leave_policy').select('*'); if(!pol.error&&pol.data) pol.data.forEach(function(r){ if(POLICY[r.status_key]!=null)POLICY[r.status_key]=+r.days_per_year; }); }catch(_){}
       say('กำลังโหลดปี '+year+'...','');
-      var erdata=await window.__pageAll(function(f,t){ return sb.from('daiki_employees').select('id,full_name,nickname,position,seq,is_active,resign_date').order('seq',{ascending:true,nullsFirst:false}).order('full_name',{ascending:true}).range(f,t); });
+      var erdata=await window.__pageAll(function(f,t){ return sb.from('daiki_employees').select('id,full_name,nickname,position,seq,is_active,resign_date,group_name').order('seq',{ascending:true,nullsFirst:false}).order('full_name',{ascending:true}).range(f,t); });
       var start=year+'-01-01', end=(year+1)+'-01-01';
       var ardata=await window.__pageAll(function(f,t){ return sb.from('daiki_attendance').select('employee_id,status_key,is_paid').gte('work_date',start).lt('work_date',end).order('employee_id',{ascending:true}).order('work_date',{ascending:true}).range(f,t); });
-      var by={}; erdata.forEach(function(e){ by[e.id]={emp:e,a:agg()}; });
+      var actives=erdata.filter(function(e){ return e.is_active!==false; });   // ไม่รวมคนลาออก
+      window.__groupSort(actives, function(e){return e.seq==null?999999:e.seq;}, function(e){return e.group_name||"";});
+      var by={}; actives.forEach(function(e){ by[e.id]={emp:e,a:agg()}; });
       ardata.forEach(function(r){ var o=by[r.employee_id]; if(!o)return; var a=o.a; var k=r.status_key;
         if(k==='present')a.present++; else if(k==='late')a.late++;
         else if(k==='sick'){ if(r.is_paid===false)a.sick_np++; else a.sick_p++; }
@@ -1536,7 +1538,7 @@ window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
         else if(k==='vacation')a.vacation++; else if(k==='absent')a.absent++;
         else if(k==='dayoff')a.dayoff++; else if(k==='holiday')a.holiday++;
       });
-      ROWS=Object.keys(by).map(function(id){return by[id];});
+      ROWS=actives.map(function(e){return by[e.id];});
       render(year);
       say('โหลดสำเร็จ ✓ '+ROWS.length+' คน','ok');
     }catch(e){ say('โหลดไม่สำเร็จ: '+(e.message||e),'err'); }
@@ -1559,7 +1561,7 @@ window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
       var pl=POLICY.personal-a.personal_p, sl=POLICY.sick-a.sick_p, vl=POLICY.vacation-a.vacation;
       var rc=rate==null?'var(--muted)':(rate>=95?'var(--present)':rate>=85?'var(--late)':'var(--absent)');
       return '<tr><td class="idx num" style="color:var(--muted)">'+(i+1)+'</td>'+
-        '<td class="who"><div class="nm">'+esc(e.full_name)+(e.nickname?' <span class="nick">('+esc(e.nickname)+')</span>':'')+(e.is_active===false?' <span style="color:var(--absent);font-size:10px">(ลาออก'+(e.resign_date?' '+e.resign_date:'')+')</span>':'')+'</div><div class="role">'+esc(e.position||'—')+'</div></td>'+
+        '<td class="who"><div class="nm">'+esc(e.full_name)+(e.nickname?' <span class="nick">('+esc(e.nickname)+')</span>':'')+(e.group_name?'<span class="grpchip">'+esc(e.group_name)+'</span>':'')+'</div><div class="role">'+esc(e.position||'—')+'</div></td>'+
         n(a.present,'present')+n(a.late,'late')+n(a.sick_p,'sick')+n(a.sick_np,'sick')+n(a.personal_p,'personal')+n(a.personal_np,'personal')+n(a.vacation,'vacation')+n(a.absent,'absent')+
         '<td><span class="stat" style="color:'+rc+'">'+(rate==null?'–':rate+'%')+'</span></td>'+
         '<td class="num" style="font-size:12px">'+pl+' / '+sl+' / '+vl+'</td></tr>';
