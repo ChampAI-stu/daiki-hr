@@ -129,7 +129,7 @@
   --present:#2E9E6B; --late:#E8912A; --sick:#C24D6B; --personal:#6B6FCB;
   --vacation:#2E93C4; --absent:#D8453A; --dayoff:#B4BAC6; --holiday:#9AA3B5;
   --shadow:0 1px 2px rgba(16,31,54,.06),0 8px 24px rgba(16,31,54,.06);
-}*{box-sizing:border-box}html,body{margin:0;padding:0}body{font-family:'IBM Plex Sans Thai',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}#view-grid .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}#view-grid h1,#view-grid h2{font-family:'Anuphan';margin:0;font-weight:600;letter-spacing:-.01em}#view-grid .topbar{background:var(--navy);color:#fff;position:sticky;top:0;z-index:60;border-bottom:3px solid var(--orange)}#view-grid .topbar-in{max-width:1400px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}#view-grid .brand{display:flex;align-items:center;gap:11px;margin-right:auto}#view-grid .mark{width:34px;height:34px}#view-grid .brand .t1{font-family:'Anuphan';font-weight:700;font-size:17px;line-height:1;letter-spacing:.02em}#view-grid .brand .t2{font-size:11.5px;color:#AEB8CF;margin-top:3px}#view-grid .mode-tag{font-size:11px;font-weight:600;color:var(--ink);background:var(--orange);padding:4px 10px;border-radius:999px}#view-grid .mode-tag.live{background:#2E9E6B;color:#fff}#view-grid .dbbar{background:#152540;border-bottom:1px solid rgba(255,255,255,.08)}#view-grid .dbbar-in{max-width:1400px;margin:0 auto;padding:10px 22px;display:flex;gap:9px;align-items:center;flex-wrap:wrap}#view-grid .dblab{color:var(--orange);font-family:'Anuphan';font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase}#view-grid .dbbar input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:#fff;border-radius:8px;padding:7px 10px;font-family:inherit;font-size:12.5px;outline:none}#view-grid .dbbar input::placeholder{color:#7C88A6}#view-grid .dbbar input.url{width:230px}#view-grid .dbbar input.key{width:150px}#view-grid .dbbar input.mon{width:140px;color-scheme:dark}#view-grid .dbbtn{font-family:inherit;font-size:12.5px;font-weight:600;border-radius:8px;padding:7px 12px;cursor:pointer;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff}#view-grid .dbbtn.go{background:var(--orange);color:var(--ink);border:none}#view-grid .dbbtn.load{background:#2E9E6B;color:#fff;border:none}#view-grid .dbbtn:hover{filter:brightness(1.08)}#view-grid .dbmsg{font-size:12px;color:#AEB8CF;margin-left:auto}#view-grid .dbmsg.ok{color:#7FE0AE}#view-grid .dbmsg.err{color:#FF9E93}#view-grid .wrap{max-width:1400px;margin:0 auto;padding:18px 22px}#view-grid .toolbar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px}#view-grid .brushes{display:flex;gap:6px;flex-wrap:wrap;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:7px 9px;box-shadow:var(--shadow)}#view-grid .brushes .lbl{font-size:12px;color:var(--muted);margin-right:2px}#view-grid .brush{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;border:1.5px solid var(--line);background:#fff;border-radius:9px;padding:6px 10px;cursor:pointer;font-family:inherit}#view-grid .brush .sw{width:15px;height:15px;border-radius:4px;font-family:'Anuphan';font-weight:700;font-size:10px;display:flex;align-items:center;justify-content:center;color:#fff}#view-grid .brush.active{border-color:var(--ink);box-shadow:0 0 0 2px rgba(16,31,54,.08)}#view-grid .brush.eraser .sw{background:#fff;border:1px solid var(--line);color:var(--muted)}#view-grid .save-ind{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:7px;margin-left:auto}#view-grid .save-ind .d{width:9px;height:9px;border-radius:50%;background:#CBCEC7}#view-grid .save-ind.saving .d{background:var(--late);animation:pulse 1s infinite}#view-grid .save-ind.saved .d{background:var(--present)}#view-grid .save-ind.err .d{background:var(--absent)}@keyframes pulse{50%{opacity:.35}}#view-grid .addbtn{font-family:inherit;font-size:12.5px;font-weight:600;border:1px dashed var(--navy);color:var(--navy);background:#fff;border-radius:9px;padding:8px 12px;cursor:pointer}#view-grid .addbtn:hover{background:var(--orange-soft)}#view-grid .grid-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:auto;max-height:74vh}#view-grid table.grid{border-collapse:separate;border-spacing:0;font-size:12.5px}#view-grid .grid th,#view-grid .grid td{border-right:1px solid #F0F0EA;border-bottom:1px solid #F0F0EA;text-align:center;white-space:nowrap}#view-grid .grid thead th{position:sticky;top:0;z-index:5;background:#F7F7F3;color:var(--muted);font-weight:600;font-size:11px;padding:7px 4px;height:44px}#view-grid .grid thead th.wknd{background:#EFEFE9;color:var(--absent)}#view-grid .grid th.hcol{min-width:34px}#view-grid .grid th.dnum{font-family:'Anuphan';font-size:13px;color:var(--ink)}#view-grid .grid th.dow{font-weight:500}#view-grid .cn{position:sticky;z-index:4;background:var(--panel)}#view-grid .c-idx{left:0;width:34px;min-width:34px}#view-grid .c-name{left:34px;min-width:190px;max-width:190px;text-align:left}#view-grid .c-sum{left:224px;width:46px;min-width:46px}#view-grid .grid thead th.cn{z-index:7;background:#F7F7F3}#view-grid .grid tbody td.cn{border-bottom:1px solid #F0F0EA}#view-grid td.c-name{padding:5px 10px}#view-grid td.c-name .nm{font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px}#view-grid td.c-name .nm .nick{color:var(--orange)}#view-grid td.c-name .role{font-size:10.5px;color:var(--muted)}#view-grid td.c-sum{font-family:'Anuphan';font-weight:700;color:var(--present);font-size:14px}#view-grid tbody tr:hover td.cn{background:#FBFAF6}#view-grid td.cell{width:30px;min-width:30px;height:34px;cursor:pointer;font-family:'Anuphan';font-weight:600;user-select:none;color:var(--ink)}#view-grid td.cell:hover{outline:2px solid var(--orange);outline-offset:-2px}#view-grid table.grid.nobrush td.cell{cursor:default}#view-grid table.grid.nobrush td.cell:hover{outline:none}#view-grid td.cell.present{background:#EAF6F0;color:var(--present)}#view-grid td.cell.late{background:#FDF1E1;color:var(--late)}#view-grid td.cell.sick{background:#FBEBF0;color:var(--sick)}#view-grid td.cell.personal{background:#EDEDFA;color:var(--personal)}#view-grid td.cell.vacation{background:#E8F4FA;color:var(--vacation)}#view-grid td.cell.absent{background:#FCEAE8;color:var(--absent)}#view-grid td.cell.dayoff{background:#F3F3F0;color:var(--dayoff)}#view-grid td.cell.holiday{background:#F3F3F0;color:var(--holiday)}#view-grid td.cell.wknd{background:#FAFAF6}#view-grid td.cell{position:relative}#view-grid td.cell.has-note::after{content:"";position:absolute;top:1px;right:1px;border-top:7px solid var(--orange);border-left:7px solid transparent}#view-grid td.cell.unpaid{background-image:repeating-linear-gradient(45deg,rgba(0,0,0,0) 0,rgba(0,0,0,0) 3px,rgba(0,0,0,.10) 3px,rgba(0,0,0,.10) 5px)}#view-grid td.cell.unpaid::before{content:"฿";position:absolute;bottom:-1px;left:1px;font-size:9px;color:var(--absent);text-decoration:line-through;font-weight:700}#view-grid td.cell.partial{font-weight:800}#view-grid .grid-filter{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 14px;margin-bottom:10px;color:var(--muted);box-shadow:var(--shadow)}#view-grid .grid-filter input{flex:1;border:none;outline:none;background:transparent;font-family:inherit;font-size:14px;color:var(--ink)}#view-grid .grid-filter #gridCount{font-size:12px;color:var(--muted);white-space:nowrap}#view-grid .brush-drop{font-family:inherit;font-size:12.5px;border:1.5px solid var(--ink);border-radius:9px;padding:6px 8px;background:var(--orange-soft);color:var(--ink);cursor:pointer;margin-left:-3px;outline:none}#view-grid .paidsel{display:flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;box-shadow:var(--shadow);font-size:12.5px;color:var(--muted)}#view-grid .paidsel select{font-family:inherit;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:6px 9px;background:#fff;color:var(--ink);cursor:pointer;outline:none}#view-grid .brush.note .sw{color:#fff}#view-grid td.cell.flash{animation:flash .8s}@keyframes flash{0%{box-shadow:inset 0 0 0 3px var(--orange)}100%{box-shadow:none}}#view-grid .grid tfoot td{position:sticky;bottom:0;z-index:5;background:#F2F5F8;font-family:'Anuphan';font-weight:600;color:var(--navy);font-size:12px;padding:7px 3px}#view-grid .grid tfoot td.cn{z-index:7}#view-grid .grid tfoot td.foot-lab{text-align:right;padding-right:10px;color:var(--muted);font-weight:600}#view-grid .legend{display:flex;gap:13px;flex-wrap:wrap;margin-top:13px;font-size:12px;color:var(--muted)}#view-grid .legend span{display:inline-flex;align-items:center;gap:6px}#view-grid .legend i{width:11px;height:11px;border-radius:3px}#view-grid .hint{font-size:12.5px;color:var(--muted);margin:2px 0 12px}#view-grid .hint b{color:var(--ink)}
+}*{box-sizing:border-box}html,body{margin:0;padding:0}body{font-family:'IBM Plex Sans Thai',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}#view-grid .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}#view-grid h1,#view-grid h2{font-family:'Anuphan';margin:0;font-weight:600;letter-spacing:-.01em}#view-grid .topbar{background:var(--navy);color:#fff;position:sticky;top:0;z-index:60;border-bottom:3px solid var(--orange)}#view-grid .topbar-in{max-width:1400px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}#view-grid .brand{display:flex;align-items:center;gap:11px;margin-right:auto}#view-grid .mark{width:34px;height:34px}#view-grid .brand .t1{font-family:'Anuphan';font-weight:700;font-size:17px;line-height:1;letter-spacing:.02em}#view-grid .brand .t2{font-size:11.5px;color:#AEB8CF;margin-top:3px}#view-grid .mode-tag{font-size:11px;font-weight:600;color:var(--ink);background:var(--orange);padding:4px 10px;border-radius:999px}#view-grid .mode-tag.live{background:#2E9E6B;color:#fff}#view-grid .dbbar{background:#152540;border-bottom:1px solid rgba(255,255,255,.08)}#view-grid .dbbar-in{max-width:1400px;margin:0 auto;padding:10px 22px;display:flex;gap:9px;align-items:center;flex-wrap:wrap}#view-grid .dblab{color:var(--orange);font-family:'Anuphan';font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase}#view-grid .dbbar input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:#fff;border-radius:8px;padding:7px 10px;font-family:inherit;font-size:12.5px;outline:none}#view-grid .dbbar input::placeholder{color:#7C88A6}#view-grid .dbbar input.url{width:230px}#view-grid .dbbar input.key{width:150px}#view-grid .dbbar input.mon{width:140px;color-scheme:dark}#view-grid .dbbtn{font-family:inherit;font-size:12.5px;font-weight:600;border-radius:8px;padding:7px 12px;cursor:pointer;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff}#view-grid .dbbtn.go{background:var(--orange);color:var(--ink);border:none}#view-grid .dbbtn.load{background:#2E9E6B;color:#fff;border:none}#view-grid .dbbtn:hover{filter:brightness(1.08)}#view-grid .dbmsg{font-size:12px;color:#AEB8CF;margin-left:auto}#view-grid .dbmsg.ok{color:#7FE0AE}#view-grid .dbmsg.err{color:#FF9E93}#view-grid .wrap{max-width:1400px;margin:0 auto;padding:18px 22px}#view-grid .toolbar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px}#view-grid .brushes{display:flex;gap:6px;flex-wrap:wrap;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:7px 9px;box-shadow:var(--shadow)}#view-grid .brushes .lbl{font-size:12px;color:var(--muted);margin-right:2px}#view-grid .brush{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;border:1.5px solid var(--line);background:#fff;border-radius:9px;padding:6px 10px;cursor:pointer;font-family:inherit}#view-grid .brush .sw{width:15px;height:15px;border-radius:4px;font-family:'Anuphan';font-weight:700;font-size:10px;display:flex;align-items:center;justify-content:center;color:#fff}#view-grid .brush.active{border-color:var(--ink);box-shadow:0 0 0 2px rgba(16,31,54,.08)}#view-grid .brush.eraser .sw{background:#fff;border:1px solid var(--line);color:var(--muted)}#view-grid .save-ind{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:7px;margin-left:auto}#view-grid .save-ind .d{width:9px;height:9px;border-radius:50%;background:#CBCEC7}#view-grid .save-ind.saving .d{background:var(--late);animation:pulse 1s infinite}#view-grid .save-ind.saved .d{background:var(--present)}#view-grid .save-ind.err .d{background:var(--absent)}@keyframes pulse{50%{opacity:.35}}#view-grid .addbtn{font-family:inherit;font-size:12.5px;font-weight:600;border:1px dashed var(--navy);color:var(--navy);background:#fff;border-radius:9px;padding:8px 12px;cursor:pointer}#view-grid .addbtn:hover{background:var(--orange-soft)}#view-grid .grid-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:auto;max-height:74vh}#view-grid table.grid{border-collapse:separate;border-spacing:0;font-size:12.5px}#view-grid .grid th,#view-grid .grid td{border-right:1px solid #F0F0EA;border-bottom:1px solid #F0F0EA;text-align:center;white-space:nowrap}#view-grid .grid thead th{position:sticky;top:0;z-index:5;background:#F7F7F3;color:var(--muted);font-weight:600;font-size:11px;padding:7px 4px;height:44px}#view-grid .grid thead th.wknd{background:#EFEFE9;color:var(--absent)}#view-grid .grid th.hcol{min-width:34px}#view-grid .grid th.dnum{font-family:'Anuphan';font-size:13px;color:var(--ink)}#view-grid .grid th.dow{font-weight:500}#view-grid .cn{position:sticky;z-index:4;background:var(--panel)}#view-grid .c-idx{left:0;width:34px;min-width:34px}#view-grid .c-name{left:34px;min-width:238px;max-width:238px;text-align:left}#view-grid .c-sum{left:272px;width:46px;min-width:46px}#view-grid .grid thead th.cn{z-index:7;background:#F7F7F3}#view-grid .grid tbody td.cn{border-bottom:1px solid #F0F0EA}#view-grid td.c-name{padding:5px 10px}#view-grid td.c-name .nm{font-weight:600;color:var(--ink);white-space:normal;line-height:1.35}#view-grid td.c-name .nm .nick{color:var(--orange)}#view-grid td.c-name .role{font-size:10.5px;color:var(--muted)}#view-grid td.c-sum{font-family:'Anuphan';font-weight:700;color:var(--present);font-size:14px}#view-grid tbody tr:hover td.cn{background:#FBFAF6}#view-grid td.cell{width:30px;min-width:30px;height:34px;cursor:pointer;font-family:'Anuphan';font-weight:600;user-select:none;color:var(--ink)}#view-grid td.cell:hover{outline:2px solid var(--orange);outline-offset:-2px}#view-grid table.grid.nobrush td.cell{cursor:default}#view-grid table.grid.nobrush td.cell:hover{outline:none}#view-grid td.cell.present{background:#EAF6F0;color:var(--present)}#view-grid td.cell.late{background:#FDF1E1;color:var(--late)}#view-grid td.cell.sick{background:#FBEBF0;color:var(--sick)}#view-grid td.cell.personal{background:#EDEDFA;color:var(--personal)}#view-grid td.cell.vacation{background:#E8F4FA;color:var(--vacation)}#view-grid td.cell.absent{background:#FCEAE8;color:var(--absent)}#view-grid td.cell.dayoff{background:#F3F3F0;color:var(--dayoff)}#view-grid td.cell.holiday{background:#F3F3F0;color:var(--holiday)}#view-grid td.cell.wknd{background:#FAFAF6}#view-grid td.cell{position:relative}#view-grid td.cell.has-note::after{content:"";position:absolute;top:1px;right:1px;border-top:7px solid var(--orange);border-left:7px solid transparent}#view-grid td.cell.unpaid{background-image:repeating-linear-gradient(45deg,rgba(0,0,0,0) 0,rgba(0,0,0,0) 3px,rgba(0,0,0,.10) 3px,rgba(0,0,0,.10) 5px)}#view-grid td.cell.unpaid::before{content:"฿";position:absolute;bottom:-1px;left:1px;font-size:9px;color:var(--absent);text-decoration:line-through;font-weight:700}#view-grid td.cell.partial{font-weight:800}#view-grid .grid-filter{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 14px;margin-bottom:10px;color:var(--muted);box-shadow:var(--shadow)}#view-grid .grid-filter input{flex:1;border:none;outline:none;background:transparent;font-family:inherit;font-size:14px;color:var(--ink)}#view-grid .grid-filter #gridCount{font-size:12px;color:var(--muted);white-space:nowrap}#view-grid .brush-drop{font-family:inherit;font-size:12.5px;border:1.5px solid var(--ink);border-radius:9px;padding:6px 8px;background:var(--orange-soft);color:var(--ink);cursor:pointer;margin-left:-3px;outline:none}#view-grid .paidsel{display:flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;box-shadow:var(--shadow);font-size:12.5px;color:var(--muted)}#view-grid .paidsel select{font-family:inherit;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:6px 9px;background:#fff;color:var(--ink);cursor:pointer;outline:none}#view-grid .brush.note .sw{color:#fff}#view-grid td.cell.flash{animation:flash .8s}@keyframes flash{0%{box-shadow:inset 0 0 0 3px var(--orange)}100%{box-shadow:none}}#view-grid .grid tfoot td{position:sticky;bottom:0;z-index:5;background:#F2F5F8;font-family:'Anuphan';font-weight:600;color:var(--navy);font-size:12px;padding:7px 3px}#view-grid .grid tfoot td.cn{z-index:7}#view-grid .grid tfoot td.foot-lab{text-align:right;padding-right:10px;color:var(--muted);font-weight:600}#view-grid .legend{display:flex;gap:13px;flex-wrap:wrap;margin-top:13px;font-size:12px;color:var(--muted)}#view-grid .legend span{display:inline-flex;align-items:center;gap:6px}#view-grid .legend i{width:11px;height:11px;border-radius:3px}#view-grid .hint{font-size:12.5px;color:var(--muted);margin:2px 0 12px}#view-grid .hint b{color:var(--ink)}
 
 
 #view-employees .emp-form{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:18px 20px;margin-bottom:16px}
@@ -188,6 +188,9 @@
 .view > .dbbar .dbbar-in input.url,.view > .dbbar .dbbar-in input.key{display:none}
 .view > .dbbar .dbbtn.go{display:none}
 .print-head{display:none}
+.grpbtn{margin-left:6px;border:1px solid var(--line);background:#fff;border-radius:6px;font-size:10px;line-height:1;padding:2px 6px;cursor:pointer;color:var(--muted);vertical-align:middle}
+.grpbtn:hover{background:#EFEFEA;color:var(--ink)}
+.grpchip{display:inline-block;background:var(--navy);color:#fff;font-size:10px;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:middle;font-weight:600}
 @media print{
   .tabbar,.no-print,.view>.topbar,.view>.dbbar{display:none !important}
   .view:not(.active){display:none !important}
@@ -372,6 +375,22 @@ window.__loadAll=function(){
   window.__setMonth(window.__ym);
   if(window.__leaveActivate) window.__leaveActivate();
   if(window.__sumActivate) window.__sumActivate(); };
+window.__setGroup=async function(empId,cur){
+  if(!empId){ alert('คนนี้ยังไม่ได้บันทึกลงฐานข้อมูล'); return; }
+  var g=prompt('ชื่อกลุ่มของคนนี้ (เว้นว่าง = เอาออกจากกลุ่ม):', cur||'');
+  if(g===null) return; g=g.trim();
+  var sb=window.__getSB(); if(!sb){ alert('ยังไม่เชื่อมต่อฐานข้อมูล'); return; }
+  var r=await sb.from('daiki_employees').update({group_name:g||null}).eq('id',empId);
+  if(r.error){ alert('บันทึกกลุ่มไม่สำเร็จ: '+(r.error.message||r.error)); return; }
+  if(window.__loadAll) window.__loadAll(); else window.__setMonth(window.__ym);
+};
+// เรียงให้คนกลุ่มเดียวกันอยู่ติดกัน (กลุ่มไปอยู่ตำแหน่งสมาชิกคนแรก)
+window.__groupSort=function(rows,getSeq,getGroup){
+  var anchor={}; rows.forEach(function(r){ var g=getGroup(r); if(g){ var s=getSeq(r); if(anchor[g]==null||s<anchor[g]) anchor[g]=s; } });
+  rows.sort(function(a,b){ var ga=getGroup(a),gb=getGroup(b); var aa=ga?anchor[ga]:getSeq(a), bb=gb?anchor[gb]:getSeq(b);
+    if(aa!==bb) return aa-bb; if((ga||"")!==(gb||"")) return (ga||"")<(gb||"")?-1:1; return getSeq(a)-getSeq(b); });
+  return rows;
+};
 window.__monthSubs=[];
 window.__onMonth=function(fn){ window.__monthSubs.push(fn); };
 window.__setMonth=function(ym){ if(!/^\d{4}-\d{2}$/.test(ym)) return; window.__ym=ym; var gi=document.getElementById('globalMonth'); if(gi) gi.value=ym; window.__monthSubs.forEach(function(fn){ try{fn(ym);}catch(e){} }); };
@@ -567,7 +586,7 @@ function renderTable(){
     var rc = rate==null? "var(--dayoff)" : rate>=95?"var(--present)":rate>=85?"var(--late)":"var(--absent)";
     var tr='<tr class="emp-row" data-id="'+e._idx+'">'+
       '<td class="idx num">'+(e._idx+1)+'</td>'+
-      '<td class="who"><div class="nm">'+esc(e.name)+(e.nick?' <span class="nick">('+esc(e.nick)+')</span>':'')+'</div>'+
+      '<td class="who"><div class="nm">'+esc(e.name)+(e.nick?' <span class="nick">('+esc(e.nick)+')</span>':'')+(e.group?'<span class="grpchip">'+esc(e.group)+'</span>':'')+'<button class="grpbtn" onclick="window.__setGroup('+(e.id||'null')+',\''+esc(e.group||"").replace(/'/g,"")+'\')">'+(e.group?'กลุ่ม':'＋กลุ่ม')+'</button></div>'+
         '<div class="role">'+esc(e.pos||"—")+'</div></td>'+
       stat(c.present,"present")+stat(c.late,"late")+stat(c.sick,"sick")+stat(c.personal,"personal")+
       '<td class="hide"><span class="stat '+(c.vacation?'vacation':'z')+'">'+(c.vacation||"–")+'</span></td>'+
@@ -687,16 +706,6 @@ document.getElementById("fileIn").addEventListener("change",function(ev){
   };
   rd.readAsArrayBuffer(f);
 });
-function loadSelectedSheet(){
-  if(!WB) return;
-  var name=document.getElementById("sheetSel").value;
-  try{
-    var d=parseSheetToData(WB.Sheets[name], name);
-    if(!d.employees.length) throw new Error("ไม่พบข้อมูลพนักงานในชีตนี้");
-    loadData(d);
-  }catch(err){ alert("ชีต \""+name+"\": "+err.message); }
-}
-
 // ------- export -------
 document.getElementById("exportBtn").addEventListener("click",function(){
   var d=DATA; var rows=d.employees.filter(passFilter);
@@ -834,52 +843,6 @@ window.__commitStaged=async function(){
   }
 };
 
-async function importToDB(){
-  if(!SB && !connectDB()) return;
-  // อ่านจากไฟล์ Excel ที่เลือก "โดยตรง" ไม่ผูกกับสิ่งที่แสดงอยู่ (กันเดี๋ยวขึ้นเดี๋ยวไม่ขึ้น)
-  var d;
-  if(WB){
-    try{ d=parseSheetToData(WB.Sheets[$("sheetSel").value], $("sheetSel").value); d.meta=monthMeta(d.asOf,d.days); }
-    catch(err){ dbSay("อ่านชีต Excel ไม่สำเร็จ: "+(err.message||err),"err"); return; }
-  } else { d=DATA; }   // ไม่ได้อัปโหลด = ใช้ข้อมูลตัวอย่าง
-  if(!d||!d.employees.length){ dbSay("ไม่มีข้อมูลให้นำเข้า — อัปโหลดไฟล์ Excel ก่อน","err"); return; }
-  var impYM=d.meta.y+"-"+pad2(d.meta.m+1);
-  try{
-    dbSay("กำลังนำเข้าพนักงาน...","");
-    // 1) upsert พนักงาน (key = full_name) — กันชื่อซ้ำในไฟล์ (Postgres upsert ห้าม key ซ้ำในคำสั่งเดียว)
-    var empSeen={}, empRows=[];
-    d.employees.forEach(function(e){
-      if(empSeen[e.name]) return;          // ข้ามชื่อซ้ำ (เก็บอันแรก)
-      empSeen[e.name]=true;
-      empRows.push({emp_code:e.code||null, full_name:e.name, nickname:e.nick||null, position:e.pos||null, seq:empRows.length});
-    });
-    var up=await SB.from("daiki_employees").upsert(empRows,{onConflict:"full_name"}).select("id,full_name");
-    if(up.error) throw up.error;
-    var idByName={}; up.data.forEach(function(r){ idByName[r.full_name]=r.id; });
-    // 2) สร้างแถวการมาทำงาน — กัน (คน+วัน) ซ้ำด้วย
-    var attSeen={}, attRows=[];
-    d.employees.forEach(function(e){
-      var eid=idByName[e.name]; if(!eid) return;
-      e.cells.forEach(function(raw,i){
-        var k=classify(raw); if(k===""||k==="other") return;
-        var day=d.days[i];
-        var wd=d.meta.y+"-"+pad2(d.meta.m+1)+"-"+pad2(day);
-        var key=eid+"|"+wd; if(attSeen[key]) return; attSeen[key]=true;
-        attRows.push({employee_id:eid, work_date:wd, raw_code:(""+raw).trim(), status_key:k, source:"excel_import"});
-      });
-    });
-    dbSay("กำลังนำเข้าการมาทำงาน "+attRows.length+" รายการ...","");
-    // upsert ทีละก้อน 500 แถว
-    for(var s=0;s<attRows.length;s+=500){
-      var chunk=attRows.slice(s,s+500);
-      var r=await SB.from("daiki_attendance").upsert(chunk,{onConflict:"employee_id,work_date"});
-      if(r.error) throw r.error;
-    }
-    dbSay("นำเข้าสำเร็จ ✓ พนักงาน "+empRows.length+" คน · การมาทำงาน "+attRows.length+" รายการ ("+impYM+")","ok");
-    window.__setMonth(impYM);   // ตั้งเดือนกลาง → ทุกแท็บเด้งไปเดือนที่เพิ่งนำเข้า
-  }catch(e){ dbSay("นำเข้าไม่สำเร็จ: "+(e.message||e),"err"); }
-}
-
 // โหลดข้อมูลเดือนที่เลือกจาก Supabase มาแสดง
 var dashReq=0;
 async function loadFromDB(){
@@ -900,7 +863,7 @@ async function loadFromDB(){
     var y=+ym.slice(0,4), m=+ym.slice(5,7);
     var end=(m===12?(y+1)+"-01":y+"-"+pad2(m+1))+"-01";
     var rdata=await window.__pageAll(function(f,t){ return SB.from("daiki_attendance")
-      .select("work_date,raw_code,status_key,daiki_employees(full_name,nickname,position,emp_code,seq)")
+      .select("work_date,raw_code,status_key,daiki_employees(id,full_name,nickname,position,emp_code,seq,is_active,group_name)")
       .gte("work_date",start).lt("work_date",end).order("employee_id",{ascending:true}).order("work_date",{ascending:true}).range(f,t); });
     if(myReq!==dashReq) return;
     if(!rdata.length){
@@ -914,14 +877,17 @@ async function loadFromDB(){
     // ประกอบเป็นโครงสร้าง DATA
     var daySet={}, empMap={};
     rdata.forEach(function(row){
+      var e=row.daiki_employees||{};
+      if(e.is_active===false) return;                 // ซ่อนคนลาออกในแดชบอร์ด
       var day=+row.work_date.slice(8,10); daySet[day]=1;
-      var e=row.daiki_employees||{}; var nm=e.full_name||"(ไม่ระบุ)";
-      if(!empMap[nm]) empMap[nm]={code:e.emp_code||"",name:nm,nick:e.nickname||"",pos:e.position||"",seq:(e.seq==null?999999:e.seq),byDay:{}};
+      var nm=e.full_name||"(ไม่ระบุ)";
+      if(!empMap[nm]) empMap[nm]={id:e.id,code:e.emp_code||"",name:nm,nick:e.nickname||"",pos:e.position||"",seq:(e.seq==null?999999:e.seq),group:e.group_name||"",byDay:{}};
       empMap[nm].byDay[day]=row.raw_code||statusToRaw(row.status_key);
     });
     var days=Object.keys(daySet).map(Number).sort(function(a,b){return a-b;});
-    var employees=Object.keys(empMap).map(function(nm){ return empMap[nm]; })
-      .sort(function(a,b){ return a.seq-b.seq || (a.name||"").localeCompare(b.name||"","th"); })
+    var employees=Object.keys(empMap).map(function(nm){ return empMap[nm]; });
+    window.__groupSort(employees, function(r){return r.seq;}, function(r){return r.group||"";});
+    employees=employees
       .map(function(e){ e.cells=days.map(function(d){ return e.byDay[d]!=null? (""+e.byDay[d]):""; }); delete e.byDay; return e; });
     var lastDay=days[days.length-1];
     if(myReq!==dashReq) return;                 // ทิ้งผลเก่าถ้าสลับเดือนแล้ว
@@ -1055,7 +1021,7 @@ function renderGrid(){
   EMP.forEach(function(e,idx){
     body+='<tr>'+
       '<td class="cn c-idx idx num" style="color:var(--muted)">'+(idx+1)+'</td>'+
-      '<td class="cn c-name"><div class="nm">'+esc(e.name)+(e.nick?' <span class="nick">('+esc(e.nick)+')</span>':'')+'</div><div class="role">'+esc(e.pos||"—")+'</div></td>'+
+      '<td class="cn c-name"><div class="nm">'+esc(e.name)+(e.nick?' <span class="nick">('+esc(e.nick)+')</span>':'')+(e.group?'<span class="grpchip">'+esc(e.group)+'</span>':'')+'<button class="grpbtn" onclick="window.__setGroup('+(e.dbId||'null')+',\''+esc(e.group||"").replace(/'/g,"")+'\')">'+(e.group?'กลุ่ม':'＋กลุ่ม')+'</button></div><div class="role">'+esc(e.pos||"—")+(e.active===false?' · <span style="color:var(--absent)">ลาออก</span>':'')+'</div></td>'+
       '<td class="cn c-sum" id="sum_'+idx+'">0</td>';
     for(var d=1;d<=nd;d++){
       var raw=e.cells[d]||""; var k=classify(raw); var dow=new Date(Y,M,d).getDay(); var wk=(dow===0||dow===6);
@@ -1232,13 +1198,17 @@ async function loadMonth(){
   if(!SB && !connectDB()) return;
   try{
     dbSay("กำลังโหลดพนักงาน...","");
-    var erdata=await window.__pageAll(function(f,t){ return SB.from("daiki_employees").select("id,emp_code,full_name,nickname,position,is_active,seq").eq("is_active",true).order("seq",{ascending:true,nullsFirst:false}).order("full_name",{ascending:true}).range(f,t); });
+    var erdata=await window.__pageAll(function(f,t){ return SB.from("daiki_employees").select("id,emp_code,full_name,nickname,position,is_active,seq,group_name").order("seq",{ascending:true,nullsFirst:false}).order("full_name",{ascending:true}).range(f,t); });
     if(!erdata.length){ dbSay("ยังไม่มีพนักงานใน DB — นำเข้าจากแดชบอร์ดก่อน หรือกด \"＋ เพิ่มพนักงาน\"","err"); }
-    EMP=erdata.map(function(r){ return {id:r.id, dbId:r.id, code:r.emp_code||"", name:r.full_name, nick:r.nickname||"", pos:r.position||"", cells:{}, notes:{}, paid:{}, hours:{}}; });
-    var byId={}; EMP.forEach(function(e,i){ byId[e.dbId]=i; }); EMP._byId=byId;
     dbSay("กำลังโหลดข้อมูลเดือน "+mv+"...","");
     var start=Y+"-"+p2(M+1)+"-01", end=(M===11?(Y+1)+"-01":Y+"-"+p2(M+2))+"-01";
     var ardata=await window.__pageAll(function(f,t){ return SB.from("daiki_attendance").select("employee_id,work_date,raw_code,status_key,note,is_paid,hours").gte("work_date",start).lt("work_date",end).order("employee_id",{ascending:true}).order("work_date",{ascending:true}).range(f,t); });
+    var hasData={}; ardata.forEach(function(r){ hasData[r.employee_id]=1; });
+    // หน้าเช็ค: แสดง "ทำงานอยู่" + คนลาออกที่มีข้อมูลเดือนนี้ (เพื่อเก็บสถิติ)
+    var rows=erdata.filter(function(r){ return r.is_active!==false || hasData[r.id]; });
+    window.__groupSort(rows, function(r){return r.seq==null?999999:r.seq;}, function(r){return r.group_name||"";});
+    EMP=rows.map(function(r){ return {id:r.id, dbId:r.id, code:r.emp_code||"", name:r.full_name, nick:r.nickname||"", pos:r.position||"", group:r.group_name||"", active:(r.is_active!==false), cells:{}, notes:{}, paid:{}, hours:{}}; });
+    var byId={}; EMP.forEach(function(e,i){ byId[e.dbId]=i; }); EMP._byId=byId;
     ardata.forEach(function(row){ var i=byId[row.employee_id]; if(i==null)return; var day=+row.work_date.slice(8,10);
       if(row.status_key){ EMP[i].cells[day]=row.raw_code||(KEYMAP[row.status_key]?KEYMAP[row.status_key].code:""); }
       if(row.note){ EMP[i].notes[day]=row.note; }
