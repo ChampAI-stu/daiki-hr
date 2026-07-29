@@ -1525,7 +1525,7 @@ window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
     try{
       try{ var pol=await sb.from('daiki_leave_policy').select('*'); if(!pol.error&&pol.data) pol.data.forEach(function(r){ if(POLICY[r.status_key]!=null)POLICY[r.status_key]=+r.days_per_year; }); }catch(_){}
       say('กำลังโหลดปี '+year+'...','');
-      var erdata=await window.__pageAll(function(f,t){ return sb.from('daiki_employees').select('id,full_name,nickname,position,seq,is_active,resign_date,group_name').order('seq',{ascending:true,nullsFirst:false}).order('full_name',{ascending:true}).range(f,t); });
+      var erdata=await window.__pageAll(function(f,t){ return sb.from('daiki_employees').select('id,full_name,nickname,position,seq,is_active,resign_date,group_name,start_date').order('seq',{ascending:true,nullsFirst:false}).order('full_name',{ascending:true}).range(f,t); });
       var start=year+'-01-01', end=(year+1)+'-01-01';
       var ardata=await window.__pageAll(function(f,t){ return sb.from('daiki_attendance').select('employee_id,status_key,is_paid').gte('work_date',start).lt('work_date',end).order('employee_id',{ascending:true}).order('work_date',{ascending:true}).range(f,t); });
       var actives=erdata.filter(function(e){ return e.is_active!==false; });   // ไม่รวมคนลาออก
@@ -1556,12 +1556,14 @@ window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
     $('sumPrintHead').innerHTML='<h2 style="text-align:center;margin:0 0 4px;font-family:Anuphan">รายงานสรุปการมาทำงานประจำปี '+(year+543)+'</h2><div style="text-align:center;color:#555;font-size:12px">บริษัท ไดกิ · พิมพ์เมื่อ '+new Date().toLocaleString('th-TH')+'</div>';
     $('sumSub').textContent='ปี '+(year+543)+' · '+list.length+' คน · หน่วย: วัน';
     function n(v,cls){return '<td><span class="stat '+(v?(cls||''):'z')+'">'+(v||'–')+'</span></td>';}
-    var head='<table><thead><tr><th style="width:36px">#</th><th class="l">พนักงาน</th><th>มา</th><th>สาย</th><th>ป่วย<br>ได้ตัง</th><th>ป่วย<br>ไม่ได้</th><th>กิจ<br>ได้ตัง</th><th>กิจ<br>ไม่ได้</th><th>พักร้อน</th><th>ขาด</th><th>อัตรา</th><th>คงเหลือ<br>กิจ/ป่วย/พร</th></tr></thead><tbody>';
+    var head='<table><thead><tr><th style="width:36px">#</th><th class="l">พนักงาน</th><th>เริ่มงาน</th><th>อายุงาน<br>(วัน)</th><th>มา</th><th>สาย</th><th>ป่วย<br>ได้ตัง</th><th>ป่วย<br>ไม่ได้</th><th>กิจ<br>ได้ตัง</th><th>กิจ<br>ไม่ได้</th><th>พักร้อน</th><th>ขาด</th><th>อัตรา</th><th>คงเหลือ<br>กิจ/ป่วย/พร</th></tr></thead><tbody>';
     var body=list.map(function(o,i){var a=o.a; var e=o.emp; var w=a.present+a.late; var exp=w+a.sick_p+a.sick_np+a.personal_p+a.personal_np+a.vacation+a.absent; var rate=exp>0?Math.round(w/exp*100):null;
       var pl=POLICY.personal-a.personal_p, sl=POLICY.sick-a.sick_p, vl=POLICY.vacation-a.vacation;
       var rc=rate==null?'var(--muted)':(rate>=95?'var(--present)':rate>=85?'var(--late)':'var(--absent)');
       return '<tr><td class="idx num" style="color:var(--muted)">'+(i+1)+'</td>'+
         '<td class="who"><div class="nm">'+esc(e.full_name)+(e.nickname?' <span class="nick">('+esc(e.nickname)+')</span>':'')+(e.group_name?'<span class="grpchip">'+esc(e.group_name)+'</span>':'')+'</div><div class="role">'+esc(e.position||'—')+'</div></td>'+
+        '<td class="num" style="font-size:12px">'+esc(e.start_date||'—')+'</td>'+
+        '<td class="num">'+(function(){ if(!e.start_date) return '—'; var t=Math.floor((Date.now()-new Date(e.start_date).getTime())/86400000); return t>=0? t.toLocaleString('en-US') : '—'; })()+'</td>'+
         n(a.present,'present')+n(a.late,'late')+n(a.sick_p,'sick')+n(a.sick_np,'sick')+n(a.personal_p,'personal')+n(a.personal_np,'personal')+n(a.vacation,'vacation')+n(a.absent,'absent')+
         '<td><span class="stat" style="color:'+rc+'">'+(rate==null?'–':rate+'%')+'</span></td>'+
         '<td class="num" style="font-size:12px">'+pl+' / '+sl+' / '+vl+'</td></tr>';
