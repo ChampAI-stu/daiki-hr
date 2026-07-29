@@ -191,6 +191,8 @@
 .grpbtn{margin-left:6px;border:1px solid var(--line);background:#fff;border-radius:6px;font-size:10px;line-height:1;padding:2px 6px;cursor:pointer;color:var(--muted);vertical-align:middle}
 .grpbtn:hover{background:#EFEFEA;color:var(--ink)}
 .grpchip{display:inline-block;background:var(--navy);color:#fff;font-size:10px;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:middle;font-weight:600}
+#view-dash #tblWrap{max-height:72vh;overflow:auto}
+#view-dash #tblWrap thead th{position:sticky;top:0;z-index:3;background:#F4F4EF;box-shadow:inset 0 -1px 0 var(--line)}
 @media print{
   .tabbar,.no-print,.view>.topbar,.view>.dbbar{display:none !important}
   .view:not(.active){display:none !important}
@@ -276,6 +278,7 @@
       <input id="q" placeholder="ค้นหาชื่อ หรือชื่อเล่น...">
     </div>
     <div class="field"><select id="dept"></select></div>
+    <div class="field"><select id="grpFilter"></select></div>
     <div class="field"><select id="sort">
       <option value="idx">เรียงตามลำดับ</option>
       <option value="name">เรียงตามชื่อ</option>
@@ -551,6 +554,8 @@ function passFilter(e){
   var q=document.getElementById("q").value.trim().toLowerCase();
   var dept=document.getElementById("dept").value;
   if(dept && (e.pos||"")!==dept) return false;
+  var grp=document.getElementById("grpFilter").value;
+  if(grp==="__none"){ if(e.group) return false; } else if(grp){ if((e.group||"")!==grp) return false; }
   if(q){
     var hay=((e.name||"")+" "+(e.nick||"")).toLowerCase();
     if(hay.indexOf(q)<0) return false;
@@ -635,6 +640,16 @@ function buildDept(){
   el.innerHTML='<option value="">ทุกแผนก / ตำแหน่ง</option>'+keys.map(function(k){
     return '<option value="'+esc(k)+'">'+esc(k)+' ('+set[k]+')</option>';
   }).join("");
+  buildGroups();
+}
+function buildGroups(){
+  var set={}, none=0; DATA.employees.forEach(function(e){ if(e.group) set[e.group]=(set[e.group]||0)+1; else none++; });
+  var keys=Object.keys(set).sort(function(a,b){return a.localeCompare(b,'th');});
+  var el=document.getElementById("grpFilter"); var cur=el.value;
+  el.innerHTML='<option value="">ทุกกลุ่ม</option>'+keys.map(function(k){
+    return '<option value="'+esc(k)+'">กลุ่ม: '+esc(k)+' ('+set[k]+')</option>';
+  }).join("")+(none?'<option value="__none">(ไม่มีกลุ่ม) ('+none+')</option>':'');
+  if(cur) el.value=cur;
 }
 
 // ------- load a dataset (from demo or upload) -------
@@ -719,7 +734,7 @@ document.getElementById("exportBtn").addEventListener("click",function(){
 });
 
 // ------- controls wiring -------
-["q","dept","sort"].forEach(function(id){
+["q","dept","grpFilter","sort"].forEach(function(id){
   document.getElementById(id).addEventListener("input",renderTable);
   document.getElementById(id).addEventListener("change",renderTable);
 });
