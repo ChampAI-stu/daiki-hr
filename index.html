@@ -241,7 +241,7 @@
   <div class="hint">เลือกเครื่องมือด้านบน แล้ว <b>คลิก</b> หรือ <b>คลิกค้างลากผ่าน</b> ช่องเพื่อกรอก · เลือก <b>ล้าง</b> เพื่อลบ · <span id="rtHint">แก้เสร็จกด <b>💾 บันทึก</b> บนแถบเมนู · โหลดล่าสุดกด <b>🔄 โหลด</b></span></div>
 
   <div class="grid-filter"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="gridSearch" placeholder="ค้นหาชื่อ / ชื่อเล่น / ตำแหน่ง" autocomplete="off"><span id="gridCount"></span></div>
-  <div class="grid-wrap"><table class="grid" id="grid"></table></div>
+  <div class="grid-wrap" id="gridWrap"><table class="grid" id="grid"></table></div>
   <div class="legend" id="legend"></div>
 </div>
 
@@ -1060,6 +1060,7 @@ function renderGrid(){
   recomputeAll();
   updateGridCursor();
   applyGridFilter();
+  window.__gridFit();
 }
 
 // ---------- editing ----------
@@ -1125,6 +1126,8 @@ function paintCell(idx,day){
 }
 function flashCell(idx,day){ var td=$("c_"+idx+"_"+day); if(!td)return; td.classList.remove("flash"); void td.offsetWidth; td.classList.add("flash"); }
 function updateGridCursor(){ var g=$("grid"); if(g) g.classList.toggle("nobrush", !brush); }
+window.__gridFit=function(){ var w=document.getElementById("gridWrap"); if(!w) return; var top=w.getBoundingClientRect().top; var hh=window.innerHeight-top-14; if(hh<320)hh=320; w.style.maxHeight=hh+"px"; };
+window.addEventListener("resize", window.__gridFit);
 
 var recomputeTimer=null;
 function recomputeSoon(){ if(recomputeTimer)return; recomputeTimer=requestAnimationFrame(function(){recomputeTimer=null;recomputeAll();}); }
@@ -1594,6 +1597,7 @@ window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
     if(name==='leave' && window.__leaveActivate) window.__leaveActivate();
     if(name==='employees' && window.__empActivate) window.__empActivate();
     if(name==='summary' && window.__sumActivate) window.__sumActivate();
+    if(name==='grid' && window.__gridFit) setTimeout(window.__gridFit,0);
     window.scrollTo(0,0);
   }
   tabs.forEach(function(t){ t.onclick=function(){ show(t.dataset.tab); }; });
