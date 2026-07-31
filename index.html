@@ -1443,17 +1443,27 @@ window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
 
   function byId(id){ for(var i=0;i<LIST.length;i++){ if(LIST[i].id===id) return LIST[i]; } return null; }
 
+  function toDMY(ymd){ if(!ymd) return ''; var p=(''+ymd).slice(0,10).split('-'); if(p.length!==3) return ''+ymd; return (+p[2])+'/'+(+p[1])+'/'+p[0]; }
+  function parseDMY(s){ s=(s||'').trim(); if(!s) return null;
+    if(/^\d{4}-\d{1,2}-\d{1,2}$/.test(s)){ var q=s.split('-'); return q[0]+'-'+('0'+q[1]).slice(-2)+'-'+('0'+q[2]).slice(-2); }
+    var m=s.split(/[\/\-.]/); if(m.length!==3) return null;
+    var d=+m[0], mo=+m[1], y=+m[2]; if(!d||!mo||!y) return null;
+    if(y<100) y+=2000; if(y>=2500) y-=543;
+    if(mo<1||mo>12||d<1||d>31) return null;
+    return y+'-'+('0'+mo).slice(-2)+'-'+('0'+d).slice(-2); }
   function showForm(emp){
     editingId = emp? emp.id : null;
     var e=emp||{};
     var F=[
       ['emp_code','รหัสพนักงาน',''],['full_name','ชื่อ-นามสกุล','req'],['nickname','ชื่อเล่น',''],
-      ['position','ตำแหน่ง',''],['group_name','กลุ่ม (คนกลุ่มเดียวกันจะแสดงติดกัน)',''],['start_date','วันเริ่มงาน','date'],['day_off','วันหยุดประจำ','']
+      ['position','ตำแหน่ง',''],['group_name','กลุ่ม (คนกลุ่มเดียวกันจะแสดงติดกัน)',''],['start_date','วันเริ่มงาน (พิมพ์ 5/7/2025)',''],['day_off','วันหยุดประจำ','']
     ];
     var fields=F.map(function(f){
-      var type=f[2]==='date'?'date':'text';
+      var isDate=(f[0]==='start_date');
+      var val=isDate? toDMY(e[f[0]]) : (e[f[0]]||'');
+      var ph=isDate? ' placeholder=\"วัน/เดือน/ปี เช่น 5/7/2025\"' : '';
       return '<div class=\"ef-f\"><label>'+f[1]+(f[2]==='req'?' <span class=\"req\">*</span>':'')+'</label>'+
-        '<input id=\"ef_'+f[0]+'\" type=\"'+type+'\" value=\"'+esc(e[f[0]]||'')+'\"></div>';
+        '<input id=\"ef_'+f[0]+'\" type=\"text\" value=\"'+esc(val)+'\"'+ph+'></div>';
     }).join('');
     $('empForm').innerHTML='<h3>'+(emp?'แก้ไขข้อมูลพนักงาน':'เพิ่มพนักงานใหม่')+'</h3>'+
       '<div class=\"ef-grid\">'+fields+'</div>'+
@@ -1467,7 +1477,7 @@ window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
     var sb=getSB(); if(!sb) return;
     function v(k){ var el=$('ef_'+k); var s=(el.value||'').trim(); return s===''?null:s; }
     var name=v('full_name'); if(!name){ say('กรุณากรอกชื่อ-นามสกุล','err'); return; }
-    var rec={emp_code:v('emp_code'), full_name:name, nickname:v('nickname'), position:v('position'), group_name:v('group_name'), start_date:v('start_date'), day_off:v('day_off')};
+    var rec={emp_code:v('emp_code'), full_name:name, nickname:v('nickname'), position:v('position'), group_name:v('group_name'), start_date:parseDMY($('ef_start_date').value), day_off:v('day_off')};
     say('กำลังบันทึก...','');
     try{
       if(editingId){ var r=await sb.from('daiki_employees').update(rec).eq('id',editingId); if(r.error) throw r.error; }
