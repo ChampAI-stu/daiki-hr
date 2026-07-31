@@ -341,6 +341,7 @@
     <div class="field"><span style="color:var(--muted);font-size:12.5px">ปี พ.ศ.</span><select id="sumYear"></select></div>
     <button class="btn" id="sumAddYear" style="background:var(--navy);border-color:var(--navy);color:#fff">＋ เพิ่มปี</button>
     <div class="field grow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="sumSearch" placeholder="ค้นหาชื่อ / ตำแหน่ง"></div>
+    <div class="field"><select id="sumGroup"></select></div>
     <button class="btn" id="sumPrint" style="background:var(--orange);border-color:var(--orange);color:var(--ink)">🖨️ พิมพ์ / บันทึก PDF</button>
     <span class="dbmsg" id="sumMsg" style="margin-left:auto"></span>
   </div>
@@ -1593,7 +1594,15 @@ window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
 
   function render(year){
     var q=($('sumSearch').value||'').trim().toLowerCase();
-    var list=ROWS.filter(function(o){ if(!q)return true; var h=((o.emp.full_name||'')+' '+(o.emp.nickname||'')+' '+(o.emp.position||'')).toLowerCase(); return h.indexOf(q)>=0; });
+    var grp=$('sumGroup')?$('sumGroup').value:'';
+    (function(){ var set={},none=0; ROWS.forEach(function(o){ var g=o.emp.group_name; if(g)set[g]=(set[g]||0)+1; else none++; });
+      var ks=Object.keys(set).sort(function(a,b){return a.localeCompare(b,'th');}); var el=$('sumGroup'); if(el){ var cur=el.value;
+        el.innerHTML='<option value="">ทุกกลุ่ม</option>'+ks.map(function(k){return '<option value="'+esc(k)+'">กลุ่ม: '+esc(k)+' ('+set[k]+')</option>';}).join('')+(none?'<option value="__none">(ไม่มีกลุ่ม) ('+none+')</option>':''); if(cur)el.value=cur; } })();
+    var list=ROWS.filter(function(o){
+      if(q){ var h=((o.emp.full_name||'')+' '+(o.emp.nickname||'')+' '+(o.emp.position||'')).toLowerCase(); if(h.indexOf(q)<0)return false; }
+      var g=o.emp.group_name||''; if(grp==='__none'){ if(g)return false; } else if(grp){ if(g!==grp)return false; }
+      return true;
+    });
     var tp=0,tl=0,tab=0,rates=[];
     list.forEach(function(o){var a=o.a; var w=a.present+a.late; var exp=w+a.sick_p+a.sick_np+a.personal_p+a.personal_np+a.vacation+a.absent;
       tp+=w; tl+=a.sick_p+a.sick_np+a.personal_p+a.personal_np+a.vacation; tab+=a.absent; if(exp>0)rates.push(w/exp*100);});
@@ -1622,6 +1631,7 @@ window.__gridEnsure=function(){try{if(SB)loadMonth();}catch(e){}};
   $('sumAddYear').addEventListener('click',function(){ var v=prompt('เพิ่มปี (พ.ศ. เช่น 2570 หรือ ค.ศ. เช่น 2027):'); if(!v)return; var nn=parseInt(v,10); if(isNaN(nn))return; var cy=nn>=2400?nn-543:nn; var sel=$('sumYear'),ex=false; for(var i=0;i<sel.options.length;i++)if(+sel.options[i].value===cy)ex=true; if(!ex){var o=document.createElement('option');o.value=cy;o.textContent=(cy+543)+' ('+cy+')'; var placed=false; for(var j=0;j<sel.options.length;j++){if(cy>+sel.options[j].value){sel.insertBefore(o,sel.options[j]);placed=true;break;}} if(!placed)sel.appendChild(o);} sel.value=cy; loadYear(); });
   $('sumYear').addEventListener('change',loadYear);
   $('sumSearch').addEventListener('input',function(){ if(curYear!=null) render(curYear); });
+  $('sumGroup').addEventListener('change',function(){ if(curYear!=null) render(curYear); });
   $('sumPrint').addEventListener('click',function(){ window.print(); });
   window.__sumActivate=function(){ if(getSB()) loadYear(); };
 })();
