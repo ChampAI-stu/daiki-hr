@@ -380,6 +380,7 @@ window.__saveAll=async function(){ var b=document.getElementById('btnSave'); if(
 window.__loadAll=function(){
   if(window.__gridDirty && window.__gridDirty() && !confirm('มีการแก้ที่ยังไม่บันทึก — โหลดใหม่จะทับของที่ยังไม่บันทึก ยืนยันไหม?')) return;
   window.__setMonth(window.__ym);
+  if(window.__gridForceLoad) window.__gridForceLoad();   // โหลด grid เฉพาะตอนกดปุ่มนี้
   if(window.__leaveActivate) window.__leaveActivate();
   if(window.__sumActivate) window.__sumActivate(); };
 // เรียงให้คนกลุ่มเดียวกันอยู่ติดกัน (กลุ่มไปอยู่ตำแหน่งสมาชิกคนแรก)
@@ -1241,7 +1242,8 @@ async function loadMonth(){
 
 $("dbConnect").addEventListener("click",connectDB);
 // เดือนกลางเปลี่ยน = โหลดเดือนนั้น
-window.__onMonth(function(){ loadMonth(); });
+window.__gridForceLoad=function(){ loadMonth(); };   // ปุ่ม 🔄 โหลด เรียกตัวนี้
+window.__onMonth(function(){ if(loadedYM!==null && loadedYM!==window.__ym){ dbSay("เดือนเปลี่ยนเป็น "+window.__ym+" — กด 🔄 โหลด เพื่อดู/แก้เดือนนี้ (ข้อมูลที่ยังไม่บันทึกยังอยู่)","err"); } });
 
 // ---------- legend ----------
 $("legend").innerHTML="คำอธิบาย:&nbsp;&nbsp;"+STATUS.map(function(s){
@@ -1264,7 +1266,7 @@ $("legend").innerHTML="คำอธิบาย:&nbsp;&nbsp;"+STATUS.map(functio
   if(ready && connectDB()){ loadMonth(); }
 })();
 
-window.__gridEnsure=function(){try{ if(SB && loadedYM!==window.__ym) loadMonth(); }catch(e){}};
+window.__gridEnsure=function(){try{ if(SB && loadedYM===null) loadMonth(); }catch(e){}};
 })();
 </script>
 <script>
