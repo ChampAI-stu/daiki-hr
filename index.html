@@ -1243,7 +1243,11 @@ async function loadMonth(){
 $("dbConnect").addEventListener("click",connectDB);
 // เดือนกลางเปลี่ยน = โหลดเดือนนั้น
 window.__gridForceLoad=function(){ loadMonth(); };   // ปุ่ม 🔄 โหลด เรียกตัวนี้
-window.__onMonth(function(){ if(loadedYM!==null && loadedYM!==window.__ym){ dbSay("เดือนเปลี่ยนเป็น "+window.__ym+" — กด 🔄 โหลด เพื่อดู/แก้เดือนนี้ (ข้อมูลที่ยังไม่บันทึกยังอยู่)","err"); } });
+window.__onMonth(function(){
+  if(loadedYM===window.__ym) return;                 // เดือนเดิม ไม่ต้องทำอะไร
+  if(!Object.keys(dirty).length){ loadMonth(); }     // ไม่มีของค้าง = โหลดเดือนใหม่ให้เลย
+  else { dbSay("เดือนเปลี่ยนเป็น "+window.__ym+" — มีข้อมูลยังไม่บันทึก กด 💾 บันทึก ก่อน หรือกด 🔄 โหลด เพื่อทิ้งแล้วโหลดเดือนใหม่","err"); }
+});
 
 // ---------- legend ----------
 $("legend").innerHTML="คำอธิบาย:&nbsp;&nbsp;"+STATUS.map(function(s){
