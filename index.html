@@ -189,8 +189,6 @@
 .view > .dbbar .dbbar-in input.url,.view > .dbbar .dbbar-in input.key{display:none}
 .view > .dbbar .dbbtn.go{display:none}
 .print-head{display:none}
-.grpbtn{margin-left:6px;border:1px solid var(--line);background:#fff;border-radius:6px;font-size:10px;line-height:1;padding:2px 6px;cursor:pointer;color:var(--muted);vertical-align:middle}
-.grpbtn:hover{background:#EFEFEA;color:var(--ink)}
 .grpchip{display:inline-block;background:var(--navy);color:#fff;font-size:10px;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:middle;font-weight:600}
 #view-dash #tblWrap, #view-employees #empWrap, #view-summary #sumTable, #view-leave #quotaWrap{overflow:visible}
 #view-dash #tblWrap thead th, #view-employees #empWrap thead th, #view-summary #sumTable thead th, #view-leave #quotaWrap thead th{position:sticky;top:var(--tabbarH,62px);z-index:5;background:#F4F4EF;box-shadow:inset 0 -1px 0 var(--line)}
@@ -384,15 +382,6 @@ window.__loadAll=function(){
   window.__setMonth(window.__ym);
   if(window.__leaveActivate) window.__leaveActivate();
   if(window.__sumActivate) window.__sumActivate(); };
-window.__setGroup=async function(empId,cur){
-  if(!empId){ alert('คนนี้ยังไม่ได้บันทึกลงฐานข้อมูล'); return; }
-  var g=prompt('ชื่อกลุ่มของคนนี้ (เว้นว่าง = เอาออกจากกลุ่ม):', cur||'');
-  if(g===null) return; g=g.trim();
-  var sb=window.__getSB(); if(!sb){ alert('ยังไม่เชื่อมต่อฐานข้อมูล'); return; }
-  var r=await sb.from('daiki_employees').update({group_name:g||null}).eq('id',empId);
-  if(r.error){ alert('บันทึกกลุ่มไม่สำเร็จ: '+(r.error.message||r.error)); return; }
-  if(window.__loadAll) window.__loadAll(); else window.__setMonth(window.__ym);
-};
 // เรียงให้คนกลุ่มเดียวกันอยู่ติดกัน (กลุ่มไปอยู่ตำแหน่งสมาชิกคนแรก)
 window.__groupSort=function(rows,getSeq,getGroup){
   var anchor={}; rows.forEach(function(r){ var g=getGroup(r); if(g){ var s=getSeq(r); if(anchor[g]==null||s<anchor[g]) anchor[g]=s; } });
