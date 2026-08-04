@@ -387,10 +387,9 @@ window.__loadAll=function(){
 window.__nameLangRank=function(name){ return /[\u0E00-\u0E7F]/.test(name||"")?0:1; };
 // เรียงให้คนกลุ่มเดียวกันอยู่ติดกัน (กลุ่มไปอยู่ตำแหน่งสมาชิกคนแรก) + ไทยขึ้นก่อนพม่า (ส่ง getName เข้ามา)
 window.__groupSort=function(rows,getSeq,getGroup,getName){
-  var anchor={},glang={};
-  rows.forEach(function(r){ var g=getGroup(r); if(g){ var s=getSeq(r);
-    if(anchor[g]==null||s<anchor[g]){ anchor[g]=s; if(getName) glang[g]=window.__nameLangRank(getName(r)); } } });
-  function lang(r){ if(!getName) return 0; var g=getGroup(r); if(g&&glang[g]!=null) return glang[g]; return window.__nameLangRank(getName(r)); }
+  var anchor={};
+  rows.forEach(function(r){ var g=getGroup(r); if(g){ var s=getSeq(r); if(anchor[g]==null||s<anchor[g]) anchor[g]=s; } });
+  function lang(r){ return getName?window.__nameLangRank(getName(r)):0; }
   rows.sort(function(a,b){
     var la=lang(a),lb=lang(b); if(la!==lb) return la-lb;
     var ga=getGroup(a),gb=getGroup(b); var aa=ga?anchor[ga]:getSeq(a), bb=gb?anchor[gb]:getSeq(b);
