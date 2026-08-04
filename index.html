@@ -1270,7 +1270,8 @@ $("legend").innerHTML="คำอธิบาย:&nbsp;&nbsp;"+STATUS.map(functio
   var s=JSON.parse($("sampleData").textContent);
   Y=s.y; M=s.m-1;
   EMP=s.employees.map(function(e,i){ var cells={}; Object.keys(e.cells).forEach(function(d){cells[+d]=e.cells[d];});
-    return {id:"s"+i, dbId:null, code:e.code||"", name:e.name, nick:e.nick||"", pos:e.pos||"", cells:cells, notes:{}, paid:{}, hours:{}}; });
+    return {id:"s"+i, dbId:null, code:e.code||"", name:e.name, nick:e.nick||"", pos:e.pos||"", cells:cells, notes:{}, paid:{}, hours:{}, _ord:i}; });
+  EMP.sort(function(a,b){ var la=window.__nameLangRank(a.name), lb=window.__nameLangRank(b.name); return la!==lb?la-lb:a._ord-b._ord; });
   if(window.__ym && /^\d{4}-\d{2}$/.test(window.__ym)){ Y=+window.__ym.slice(0,4); M=+window.__ym.slice(5,7)-1; }
   renderBrushes(); renderGrid();
 
