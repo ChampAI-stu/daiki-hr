@@ -1319,7 +1319,7 @@ window.__gridEnsure=function(){try{ if(SB && loadedYM===null) loadMonth(); }catc
   var POLICY={personal:{label:'ลากิจ',quota:32},sick:{label:'ลาป่วย',quota:240},vacation:{label:'พักร้อน',quota:6,perQuarter:2}};   // personal/sick=ชม. · vacation=วัน
   var SB=null, loadedYear=null;
   function getSB(){ if(!SB) SB=window.__getSB(); return SB; }
-  function emptyUse(){return {sick:0,sick_np:0,personal:0,personal_np:0,vacation:0,vq:[0,0,0,0]};}
+  function emptyUse(){return {sick:0,sick_np:0,personal:0,personal_np:0,vacation:0,vq:[0,0,0]};}
 
   function initYear(){
     var ySel=$('quotaYear'); if(ySel.options.length) return;
@@ -1366,7 +1366,7 @@ window.__gridEnsure=function(){try{ if(SB && loadedYM===null) loadMonth(); }catc
     var body=list.map(function(e,i){
       var u=e.use;
       var pOver=u.personal>POLICY.personal.quota, sOver=u.sick>POLICY.sick.quota,
-          vYear=u.vacation>POLICY.vacation.quota, vQ=Math.max(u.vq[0],u.vq[1],u.vq[2],u.vq[3])>POLICY.vacation.perQuarter;
+          vYear=u.vacation>POLICY.vacation.quota, vQ=Math.max(u.vq[0],u.vq[1],u.vq[2])>POLICY.vacation.perQuarter;
       var flags=[]; if(pOver)flags.push('ลากิจเกินสิทธิ'); if(sOver)flags.push('ลาป่วยเกินสิทธิ');
       if(vYear)flags.push('พักร้อนเกินสิทธิปี'); if(vQ)flags.push('พักร้อนเกินไตรมาส');
       var badge=flags.length?'<span class="badge over" title="'+esc(flags.join(', '))+'">เกินสิทธิ ('+flags.length+')</span>':'<span class="badge ok">ปกติ</span>';
@@ -1377,7 +1377,7 @@ window.__gridEnsure=function(){try{ if(SB && loadedYM===null) loadMonth(); }catc
         '<td>'+qbar(u.vacation,POLICY.vacation.quota)+vqChips(u.vq,POLICY.vacation.perQuarter)+'</td>'+
         '<td>'+badge+'</td></tr>';
     }).join('');
-    var over=list.filter(function(e){var u=e.use;return u.personal>POLICY.personal.quota||u.sick>POLICY.sick.quota||u.vacation>POLICY.vacation.quota||Math.max(u.vq[0],u.vq[1],u.vq[2],u.vq[3])>POLICY.vacation.perQuarter;}).length;
+    var over=list.filter(function(e){var u=e.use;return u.personal>POLICY.personal.quota||u.sick>POLICY.sick.quota||u.vacation>POLICY.vacation.quota||Math.max(u.vq[0],u.vq[1],u.vq[2])>POLICY.vacation.perQuarter;}).length;
     $('quotaWrap').innerHTML=list.length?head+body+'</tbody></table>':'<div class="empty-state"><h3>ยังไม่มีรายการลา</h3><div>ปีนี้ยังไม่มีการลาป่วย/ลากิจ/พักร้อนในฐานข้อมูล</div></div>';
     if(list.length && over) $('quotaSub').textContent+=' · ⚠ เกินสิทธิ '+over+' คน';
   }
@@ -1397,7 +1397,7 @@ window.__gridEnsure=function(){try{ if(SB && loadedYM===null) loadMonth(); }catc
       rdata.forEach(function(row){
         var e=row.daiki_employees||{}; var nm=e.full_name||'(ไม่ระบุ)';
         if(!by[nm]) by[nm]={name:nm,nick:e.nickname||'',pos:e.position||'',group:e.group_name||'',use:emptyUse()};
-        var u=by[nm].use; var q=Math.floor((+row.work_date.slice(5,7)-1)/3);
+        var u=by[nm].use; var q=Math.floor((+row.work_date.slice(5,7)-1)/4);   // ไตรมาส = 4 เดือน → 3 ช่วง (0,1,2)
         var hr=(row.hours!=null?+row.hours:8);
         if(row.status_key==='sick'){ if(row.is_paid===false)u.sick_np+=hr; else u.sick+=hr; }           // ลาป่วย = ชั่วโมง
         else if(row.status_key==='personal'){ if(row.is_paid===false)u.personal_np+=hr; else u.personal+=hr; }   // ลากิจ = ชั่วโมง
