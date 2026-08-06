@@ -385,6 +385,17 @@ window.__loadAll=function(){
   if(window.__sumActivate) window.__sumActivate(); };
 // ชื่อไทย = บน (0), ชื่อพม่า/อื่น (อักษรละติน) = ล่าง (1)
 window.__nameLangRank=function(name){ return /[\u0E00-\u0E7F]/.test(name||"")?0:1; };
+// แปลงวันเริ่มงานเป็น timestamp เพื่อใช้เรียง — รองรับ ISO, DD/MM/YYYY, พ.ศ. (>2200 หัก 543), ค่าว่าง→ไปท้ายสุด
+window.__parseStart=function(s){
+  var FAR=8.64e15; if(s==null) return FAR; s=(""+s).trim(); if(!s) return FAR;
+  var y,mo,d,m;
+  if((m=s.match(/^(\d{3,4})[-\/.](\d{1,2})[-\/.](\d{1,2})$/))){ y=+m[1]; mo=+m[2]; d=+m[3]; }
+  else if((m=s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2,4})$/))){ d=+m[1]; mo=+m[2]; y=+m[3]; }
+  else { var t=Date.parse(s); return isNaN(t)?FAR:t; }
+  if(y>2200) y-=543;
+  if(y<1900||mo<1||mo>12||d<1||d>31) return FAR;
+  var ts=Date.UTC(y,mo-1,d); return isNaN(ts)?FAR:ts;
+};
 // เรียงให้คนกลุ่มเดียวกันอยู่ติดกัน (กลุ่มไปอยู่ตำแหน่งสมาชิกคนแรก) + ไทยขึ้นก่อนพม่า (ส่ง getName เข้ามา)
 window.__groupSort=function(rows,getSeq,getGroup,getName){
   var anchor={};
@@ -1227,7 +1238,7 @@ async function loadMonth(){
   if(!SB && !connectDB()) return;
   try{
     dbSay("กำลังโหลดพนักงาน...","");
-    var erdata=await window.__pageAll(function(f,t){ return SB.from("daiki_employees").select("id,emp_code,full_name,nickname,position,is_active,seq,group_name").order("seq",{ascending:true,nullsFirst:false}).order("full_name",{ascending:true}).range(f,t); });
+    var erdata=await window.__pageAll(function(f,t){ return SB.from("daiki_employees").select("id,emp_code,full_name,nickname,position,is_active,seq,group_name,start_date").order("seq",{ascending:true,nullsFirst:false}).order("full_name",{ascending:true}).range(f,t); });
     if(!erdata.length){ dbSay("ยังไม่มีพนักงานใน DB — นำเข้าจากแดชบอร์ดก่อน หรือกด \"＋ เพิ่มพนักงาน\"","err"); }
     dbSay("กำลังโหลดข้อมูลเดือน "+mv+"...","");
     var start=Y+"-"+p2(M+1)+"-01", end=(M===11?(Y+1)+"-01":Y+"-"+p2(M+2))+"-01";
@@ -1235,8 +1246,20 @@ async function loadMonth(){
     var hasData={}; ardata.forEach(function(r){ hasData[r.employee_id]=1; });
     // หน้าเช็ค: แสดง "ทำงานอยู่" + คนลาออกที่มีข้อมูลเดือนนี้ (เพื่อเก็บสถิติ)
     var rows=erdata.filter(function(r){ return r.is_active!==false || hasData[r.id]; });
-    window.__groupSort(rows, function(r){return r.seq==null?999999:r.seq;}, function(r){return r.group_name||"";}, function(r){return r.full_name||"";});
-    EMP=rows.map(function(r){ return {id:r.id, dbId:r.id, code:r.emp_code||"", name:r.full_name, nick:r.nickname||"", pos:r.position||"", group:r.group_name||"", active:(r.is_active!==false), cells:{}, notes:{}, paid:{}, hours:{}}; });
+    (function(){
+      var gmin={};
+      rows.forEach(function(r){ var g=r.group_name||""; var ts=window.__parseStart(r.start_date); if(gmin[g]==null||ts<gmin[g]) gmin[g]=ts; });
+      rows.sort(function(a,b){
+        var ga=a.group_name||"", gb=b.group_name||"";
+        var gma=gmin[ga], gmb=gmin[gb];
+        if(gma!==gmb) return gma-gmb;                                  // เรียงกลุ่มตามวันเริ่มงานที่เก่าสุดในกลุ่ม
+        if(ga!==gb) return ga<gb?-1:1;                                 // คุมให้คนกลุ่มเดียวกันอยู่ติดกัน
+        var ta=window.__parseStart(a.start_date), tb=window.__parseStart(b.start_date);
+        if(ta!==tb) return ta-tb;                                      // ในกลุ่ม: เรียงวันเริ่มงาน เก่า→ใหม่
+        return (a.seq==null?9e9:a.seq)-(b.seq==null?9e9:b.seq);        // ตัวช่วยตัดสิน
+      });
+    })();
+    EMP=rows.map(function(r){ return {id:r.id, dbId:r.id, code:r.emp_code||"", name:r.full_name, nick:r.nickname||"", pos:r.position||"", group:r.group_name||"", start:r.start_date||null, active:(r.is_active!==false), cells:{}, notes:{}, paid:{}, hours:{}}; });
     var byId={}; EMP.forEach(function(e,i){ byId[e.dbId]=i; }); EMP._byId=byId;
     ardata.forEach(function(row){ var i=byId[row.employee_id]; if(i==null)return; var day=+row.work_date.slice(8,10);
       if(row.status_key){ EMP[i].cells[day]=row.raw_code||(KEYMAP[row.status_key]?KEYMAP[row.status_key].code:""); }
